@@ -34,19 +34,6 @@ const Logger = require('@mojaloop/central-services-logger')
 const oracleDomain = require('../../../../src/domain/oracle/oracle')
 const Db = require('../../../../src/lib/db')
 
-
-
-const createOracleRequest = {
-  payload: {
-    oracleIdType: 'MSISDN',
-    endpoint: {
-      value: 'http://localhost:8444',
-      endpointType: 'URL'
-    },
-    currency: 'USD'
-  }
-}
-
 const partyIdTypeResponse = {
   partyIdTypeId: 1,
   name: 'MSISDN',
@@ -72,17 +59,6 @@ const getOracleDatabaseResponse = [{
   endpointType: 'URL',
   value: 'http://localhost:8444',
   idType: 'MSISDN',
-  currency: 'USD',
-  isDefault: true
-}]
-
-const getOracleResponse = [{
-  oracleId: 1,
-  oracleIdType: 'MSISDN',
-  endpoint: {
-    value: 'http://localhost:8444',
-    endpointType: 'URL'
-  },
   currency: 'USD',
   isDefault: true
 }]
@@ -175,10 +151,118 @@ describe('Oracle tests', () => {
   })
 
   describe('getOracle', () => {
-    it.todo('should get the details of the requested oracle without currency and type')
-    it.todo('should get the details of the requested oracle with currency')
-    it.todo('should get the details of the requested oracle with currency and type')
-    it.todo('should throw on database query error')
+    it('should get the details of the requested oracle without currency and type', async () => {
+      // Arrange
+      const query = {}
+      const expected = [{
+        oracleId: 1,
+        oracleIdType: 'MSISDN',
+        endpoint: {
+          value: 'http://localhost:8444',
+          endpointType: 'URL'
+        },
+        currency: 'USD',
+        isDefault: true
+      }]
+      
+      // Act
+      const response = await oracleDomain.getOracle(getOracleRequest.query)
+      
+      // Assert
+      expect(response).toEqual(expected)
+    })
+
+
+    it('should get the details of the requested oracle with currency', async () => {
+      // Arrange
+      const query = {
+        currency: "USD"
+      }
+      const expected = [{
+        oracleId: 1,
+        oracleIdType: 'MSISDN',
+        endpoint: {
+          value: 'http://localhost:8444',
+          endpointType: 'URL'
+        },
+        currency: 'USD',
+        isDefault: true
+      }]
+      
+      // Act
+      const response = await oracleDomain.getOracle(getOracleRequest.query)
+      
+      // Assert
+      expect(response).toEqual(expected)
+    })
+
+
+    it('should get the details of the requested oracle with type', async () => {
+      // Arrange
+      const query = {
+        type: 'MSISDN'
+      }
+      const expected = [{
+        oracleId: 1,
+        oracleIdType: 'MSISDN',
+        endpoint: {
+          value: 'http://localhost:8444',
+          endpointType: 'URL'
+        },
+        currency: 'USD',
+        isDefault: true
+      }]
+      
+      // Act
+      const response = await oracleDomain.getOracle(getOracleRequest.query)
+
+      // Assert
+      expect(response).toEqual(expected)
+    })
+
+    it('should get the details of the requested oracle with currency and type', async () => {
+      // Arrange
+      const query = {
+        currency: 'USD',
+        type: 'MSISDN'
+      }
+      const expected = [{
+        oracleId: 1,
+        oracleIdType: 'MSISDN',
+        endpoint: {
+          value: 'http://localhost:8444',
+          endpointType: 'URL'
+        },
+        currency: 'USD',
+        isDefault: true
+      }]
+      
+      // Act
+      const response = await oracleDomain.getOracle(getOracleRequest.query)
+
+      // Assert
+      expect(response).toEqual(expected)
+    })
+
+    it('should throw on database query error', async () => {
+      // Arrange
+      sandbox.restore()
+      Db.oracleEndpoint = {
+        query: sandbox.stub(),
+        insert: sandbox.stub()
+      }
+      Db.oracleEndpoint.insert.returns(true)
+      Db.oracleEndpoint.query.throws(new Error())
+      const request = {
+        query: {}
+      }
+      
+      // Act
+      const action = async () => await oracleDomain.getOracle(request)
+
+      // Assert
+      await expect(action()).rejects.toThrow()
+    })
   })
 
 })
