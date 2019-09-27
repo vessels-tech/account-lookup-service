@@ -30,7 +30,6 @@
 'use strict'
 
 const Sinon = require('sinon')
-const Mockgen = require('../../../../util/mockgen.js')
 const Db = require('../../../../../src/lib/db')
 const oracleEndpoint = require('../../../../../src/models/oracle')
 const participant = require('../../../../../src/models/participantEndpoint/facade')
@@ -45,17 +44,6 @@ const Enums = require('@mojaloop/central-services-shared').Enum
 
 let server
 let sandbox
-
-const generateMockRequest = async (path, operation) => {
-  return new Promise((resolve, reject) => {
-    Mockgen().requests({
-      path,
-      operation
-    }, function (error, mock) {
-      return error ? reject(error) : resolve(mock)
-    })
-  })
-}
 
 describe('/participants/{Type}/{ID}', () => {
   beforeAll(async () => {
@@ -73,7 +61,7 @@ describe('/participants/{Type}/{ID}', () => {
 
   it('getParticipantsByTypeAndID returns 202', async () => {
     // Arrange
-    const mock = await generateMockRequest('/participants/{Type}/{ID}', 'get')
+    const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'get')
     const options = {
       method: 'get',
       url: mock.request.path,
@@ -91,7 +79,7 @@ describe('/participants/{Type}/{ID}', () => {
 
   it('getParticipantsByTypeAndID sends an async 3200 for invalid party id', async () => {
     // Arrange
-    const mock = await generateMockRequest('/participants/{Type}/{ID}', 'get')
+    const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'get')
     const options = {
       method: 'get',
       url: mock.request.path,
