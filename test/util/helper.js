@@ -50,9 +50,9 @@ const getPayeefspEndpointsUri = Mustache.render(Config.SWITCH_ENDPOINT + Enums.E
  * @param {*} operation - A HTTP Method (lowercase). e.g. `get`
  */
 
-const generateMockRequest = async (path, operation) => {
+const generateMockRequest = async (path, operation, isApi = true) => {
   return new Promise((resolve, reject) => {
-    Mockgen().requests({
+    Mockgen(isApi).requests({
       path,
       operation
     }, function (error, mock) {
