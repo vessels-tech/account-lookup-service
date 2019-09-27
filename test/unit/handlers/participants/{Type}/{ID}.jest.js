@@ -32,7 +32,6 @@
 const Sinon = require('sinon')
 const Mockgen = require('../../../../util/mockgen.js')
 const Db = require('../../../../../src/lib/db')
-const Logger = require('@mojaloop/central-services-logger')
 const oracleEndpoint = require('../../../../../src/models/oracle')
 const participant = require('../../../../../src/models/participantEndpoint/facade')
 const participants = require('../../../../../src/domain/participants')
@@ -51,7 +50,7 @@ const generateMockRequest = async (path, operation) => {
   return new Promise((resolve, reject) => {
     Mockgen().requests({
       path,
-      operation,
+      operation
     }, function (error, mock) {
       return error ? reject(error) : resolve(mock)
     })
@@ -81,10 +80,10 @@ describe('/participants/{Type}/{ID}', () => {
       headers: Helper.defaultSwitchHeaders
     }
     sandbox.stub(participants, 'getParticipantsByTypeAndID').returns({})
-    
+
     // Act
     const response = await server.inject(options)
-    
+
     // Assert
     expect(response.statusCode).toBe(202)
     participants.getParticipantsByTypeAndID.restore()
@@ -92,13 +91,13 @@ describe('/participants/{Type}/{ID}', () => {
 
   it('getParticipantsByTypeAndID sends an async 3200 for invalid party id', async () => {
     // Arrange
-    const mock = await generateMockRequest('/participants/{Type}/{ID}', 'get')    
+    const mock = await generateMockRequest('/participants/{Type}/{ID}', 'get')
     const options = {
       method: 'get',
       url: mock.request.path,
       headers: Helper.defaultSwitchHeaders
     }
-  
+
     const badRequestError = ErrorHandler.Factory.createFSPIOPError(
       ErrorHandler.Enums.FSPIOPErrorCodes.DESTINATION_COMMUNICATION_ERROR,
       'Failed to send HTTP request to host',
@@ -121,5 +120,4 @@ describe('/participants/{Type}/{ID}', () => {
     expect(response.statusCode).toBe(202)
     stubs.forEach(s => s.restore())
   })
-
 })
