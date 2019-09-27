@@ -112,7 +112,6 @@ const createServer = async (port, isApi) => {
 
 const initialize = async (port = Config.API_PORT, isApi = true) => {
   await connectDatabase()
-  console.log("isApi is", isApi)
   await migrate(isApi)
   const server = await createServer(port, isApi)
   server.plugins.openapi.setHost(server.info.host + ':' + server.info.port)
