@@ -25,6 +25,11 @@
       "src/**/*.js"
     ]
   },
+  "standard": {
+    "env": [
+      "jest"
+    ]
+  },
   "pre-commit": [
     "standard",
     "dep:check",

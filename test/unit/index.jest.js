@@ -30,12 +30,11 @@
 const Sinon = require('sinon')
 const Logger = require('@mojaloop/central-services-logger')
 
-const server = require('../../src/server')
+// const server = require('../../src/server')
 
 let sandbox
 
-describe('Base Tests', () =>  {
-
+describe('Base Tests', () => {
   beforeEach(() => {
     try {
       sandbox = Sinon.createSandbox()
@@ -49,16 +48,15 @@ describe('Base Tests', () =>  {
     sandbox.restore()
   })
 
-
   it('should import setup and initialize', () => {
-    // Arrange 
-    const initializeSpy = jest.spyOn(server, 'initialize')
+    // Arrange
+    // const initializeSpy = jest.spyOn(server, 'initialize')
     // const initStub = sandbox.stub()
     // console.log(initializeSpy)
     // server.initialize.mock
-    
+
     // Act
-    //we just need to mock out the initialize function...
+    // we just need to mock out the initialize function...
 
     // Proxyquire('../../src/index', {
     //   './server': {
@@ -66,11 +64,9 @@ describe('Base Tests', () =>  {
     //   }
     // })
 
-
-  
     // Assert
-    //Somehow I think Proxyquire actually imported index and called it.
-    //We need a different approach for Jest - maybe refer to quoting service
+    // Somehow I think Proxyquire actually imported index and called it.
+    // We need a different approach for Jest - maybe refer to quoting service
     // expect(initializeSpy).toBeCalled()
     expect(true).toBe(true)
   })

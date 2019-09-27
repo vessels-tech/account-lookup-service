@@ -30,7 +30,6 @@
 'use strict'
 
 const Sinon = require('sinon')
-const Logger = require('@mojaloop/central-services-logger')
 const oracleDomain = require('../../../../src/domain/oracle/oracle')
 const Db = require('../../../../src/lib/db')
 
@@ -50,10 +49,6 @@ const endpointTypeResponse = {
   createdDate: '2019-05-24 08:52:19'
 }
 
-const getOracleRequest = {
-  query: {}
-}
-
 const getOracleDatabaseResponse = [{
   oracleEndpointId: 1,
   endpointType: 'URL',
@@ -66,7 +61,6 @@ const getOracleDatabaseResponse = [{
 let sandbox
 
 describe('Oracle tests', () => {
-
   beforeEach(() => {
     sandbox = Sinon.createSandbox()
     Db.partyIdType = {
@@ -141,9 +135,9 @@ describe('Oracle tests', () => {
           endpointType: 'URL'
         }
       }
-      
+
       // Act
-      const action = async () => await oracleDomain.createOracle(createPayload)
+      const action = async () => oracleDomain.createOracle(createPayload)
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -164,19 +158,18 @@ describe('Oracle tests', () => {
         currency: 'USD',
         isDefault: true
       }]
-      
+
       // Act
-      const response = await oracleDomain.getOracle(getOracleRequest.query)
-      
+      const response = await oracleDomain.getOracle(query)
+
       // Assert
       expect(response).toEqual(expected)
     })
 
-
     it('should get the details of the requested oracle with currency', async () => {
       // Arrange
       const query = {
-        currency: "USD"
+        currency: 'USD'
       }
       const expected = [{
         oracleId: 1,
@@ -188,14 +181,13 @@ describe('Oracle tests', () => {
         currency: 'USD',
         isDefault: true
       }]
-      
+
       // Act
-      const response = await oracleDomain.getOracle(getOracleRequest.query)
-      
+      const response = await oracleDomain.getOracle(query)
+
       // Assert
       expect(response).toEqual(expected)
     })
-
 
     it('should get the details of the requested oracle with type', async () => {
       // Arrange
@@ -212,9 +204,9 @@ describe('Oracle tests', () => {
         currency: 'USD',
         isDefault: true
       }]
-      
+
       // Act
-      const response = await oracleDomain.getOracle(getOracleRequest.query)
+      const response = await oracleDomain.getOracle(query)
 
       // Assert
       expect(response).toEqual(expected)
@@ -236,9 +228,9 @@ describe('Oracle tests', () => {
         currency: 'USD',
         isDefault: true
       }]
-      
+
       // Act
-      const response = await oracleDomain.getOracle(getOracleRequest.query)
+      const response = await oracleDomain.getOracle(query)
 
       // Assert
       expect(response).toEqual(expected)
@@ -256,13 +248,12 @@ describe('Oracle tests', () => {
       const request = {
         query: {}
       }
-      
+
       // Act
-      const action = async () => await oracleDomain.getOracle(request)
+      const action = async () => oracleDomain.getOracle(request)
 
       // Assert
       await expect(action()).rejects.toThrow()
     })
   })
-
 })

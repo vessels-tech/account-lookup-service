@@ -1,7 +1,7 @@
 module.exports = {
   verbose: true,
   collectCoverageFrom: [
-    "**/src/**/**/*.js",
+    '**/src/**/**/*.js'
   ],
   coverageThreshold: {
     global: {
@@ -11,4 +11,4 @@ module.exports = {
       lines: 90
     }
   }
-};
+}
