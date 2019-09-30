@@ -47,6 +47,14 @@ const getOracleDatabaseResponse = [{
   isDefault: true
 }]
 
+const createOracleModel = {
+  oracleEndpointId: 1,
+  endpointType: 'URL',
+  value: 'http://localhost:8444',
+  idType: 'MSISDN',
+  currency: 'USD',
+}
+
 describe('oracleEndpoint', () => {
   beforeEach(() => {
     sandbox = Sinon.createSandbox()
@@ -79,6 +87,25 @@ describe('oracleEndpoint', () => {
       expect(result).toStrictEqual(getOracleDatabaseResponse)
     })
 
+    it('gets an oracleEndpoint by type with builder', async () => {
+      // Arrange
+      const builderStub = sandbox.stub()
+      builderStub.innerJoin = sandbox.stub().returns({
+        innerJoin: sandbox.stub().returns({
+          where: sandbox.stub().returns({
+            select: sandbox.stub().resolves(getOracleDatabaseResponse)
+          })
+        })
+      })
+      Db.oracleEndpoint.query.callsArgWith(0, builderStub)
+      
+      // Act
+      const result = await oracleEndpoint.getOracleEndpointByType('URL')
+      
+      // Assert
+      expect(result).toStrictEqual(getOracleDatabaseResponse)
+    })
+
     it('fails to get an oracleEndpoint', async () => {
       // Arrange
       queryStub.throws(new Error("failed to get oracleEndpoint"))
@@ -103,7 +130,17 @@ describe('oracleEndpoint', () => {
 
     it('gets an oracleEndpoint by type and currency', async () => {
       // Arrange
-      queryStub.resolves(getOracleDatabaseResponse)
+      const builderStub = sandbox.stub()
+      builderStub.innerJoin = sandbox.stub().returns({
+        innerJoin: sandbox.stub().returns({
+          innerJoin: sandbox.stub().returns({
+            where: sandbox.stub().returns({
+              select: sandbox.stub().resolves(getOracleDatabaseResponse)
+            })
+          })
+        })
+      })
+      Db.oracleEndpoint.query.callsArgWith(0, builderStub)
 
       // Act
       const result = await oracleEndpoint.getOracleEndpointByTypeAndCurrency('URL', 'USD')
@@ -137,7 +174,17 @@ describe('oracleEndpoint', () => {
 
     it('gets an oracleEndpoint by currency', async () => {
       // Arrange
-      queryStub.resolves(getOracleDatabaseResponse)
+      const builderStub = sandbox.stub()
+      builderStub.innerJoin = sandbox.stub().returns({
+        innerJoin: sandbox.stub().returns({
+          innerJoin: sandbox.stub().returns({
+            where: sandbox.stub().returns({
+              select: sandbox.stub().resolves(getOracleDatabaseResponse)
+            })
+          })
+        })
+      })
+      Db.oracleEndpoint.query.callsArgWith(0, builderStub)
 
       // Act
       const result = await oracleEndpoint.getOracleEndpointByCurrency('USD')
@@ -160,27 +207,201 @@ describe('oracleEndpoint', () => {
   })
 
   describe('getOracleEndpointById', () => {
-    it.todo('gets an oracleEndpoint by Id')
-    it.todo('fails to get an oracleEndpoint by Id')
+    let queryStub
+
+    beforeEach(() => {
+      queryStub = sandbox.stub()
+      Db.oracleEndpoint = {
+        query: queryStub
+      }
+    })
+
+    it('gets an oracleEndpoint by Id', async () => {
+      // Arrange
+      const builderStub = sandbox.stub()
+      builderStub.innerJoin = sandbox.stub().returns({
+        innerJoin: sandbox.stub().returns({
+          innerJoin: sandbox.stub().returns({
+            where: sandbox.stub().returns({
+              select: sandbox.stub().resolves(getOracleDatabaseResponse)
+            })
+          })
+        })
+      })
+      Db.oracleEndpoint.query.callsArgWith(0, builderStub)
+
+      // Act
+      const result = await oracleEndpoint.getOracleEndpointById('1')
+
+      // Assert
+      expect(queryStub.calledOnce).toBe(true)
+      expect(result).toStrictEqual(getOracleDatabaseResponse)
+    })
+
+    it('fails to get an oracleEndpoint by Id', async () => {
+      // Arrange
+      queryStub.throws(new Error("failed to get oracleEndpoint"))
+
+      // Act
+      const action = async () => await oracleEndpoint.getOracleEndpointById('1')
+
+      // Assert
+      await expect(action()).rejects.toThrow()
+    })
   })
 
   describe('getAllOracleEndpoint', () => {
-    it.todo('gets all oracle endpoints')
-    it.todo('fails to get all oracleEndpoints') //not needed
+    let queryStub
+
+    beforeEach(() => {
+      queryStub = sandbox.stub()
+      Db.oracleEndpoint = {
+        query: queryStub
+      }
+    })
+
+    it('gets all oracle endpoints', async () => {
+      // Arrange
+      const builderStub = sandbox.stub()
+      builderStub.innerJoin = sandbox.stub().returns({
+        innerJoin: sandbox.stub().returns({
+          where: sandbox.stub().returns({
+            select: sandbox.stub().resolves(getOracleDatabaseResponse)
+          })
+        })
+      })
+      Db.oracleEndpoint.query.callsArgWith(0, builderStub)
+
+      // Act
+      const result = await oracleEndpoint.getAllOracleEndpoint('1')
+
+      // Assert
+      expect(queryStub.calledOnce).toBe(true)
+      expect(result).toStrictEqual(getOracleDatabaseResponse)
+    })
+  })
+
+  describe('createOracleEndpoint', () => {
+    let insertStub
+
+    beforeEach(() => {
+      insertStub = sandbox.stub()
+      Db.oracleEndpoint = {
+        insert: insertStub
+      }
+    })
+
+    it('creates an oracleEndpoint by Id', async () => {
+      // Arrange
+      insertStub.resolves(true)
+
+      // Act
+      const result = await oracleEndpoint.createOracleEndpoint(createOracleModel)
+
+      // Assert
+      expect(insertStub.calledOnce).toBe(true)
+      expect(result).toBe(true)
+    })
+
+    it('fails to create an oracleEndpoint by Id', async () => {
+      // Arrange
+      insertStub.throws(new Error("failed to create oracle endpoint"))
+
+      // Act
+      const action = async () => await oracleEndpoint.createOracleEndpoint(createOracleModel)
+
+      // Assert
+      await expect(action()).rejects.toThrow()
+    })
   })
 
   describe('updateOracleEndpointById', () => {
-    it.todo('updates an oracleEndpoint by Id')
-    it.todo('fails to update an oracleEndpoint by Id')
+    let updateStub
+
+    beforeEach(() => {
+      updateStub = sandbox.stub()
+      Db.oracleEndpoint = {
+        update: updateStub
+      }
+    })
+
+    it('fails to update an oracleEndpoint by Id', async () => {
+      // Arrange
+      updateStub.throws(new Error("failed to create oracle endpoint"))
+
+      // Act
+      const action = async () => await oracleEndpoint.updateOracleEndpointById(createOracleModel)
+
+      // Assert
+      await expect(action()).rejects.toThrow()
+    })
   })
 
   describe('setIsActiveOracleEndpoint', () => {
-    it.todo('sets the active oracleEndpoint')
-    it.todo('fails to set the active oracleEndpoint')
+    let updateStub
+
+    beforeEach(() => {
+      updateStub = sandbox.stub()
+      Db.oracleEndpoint = {
+        update: updateStub
+      }
+    })
+
+    it('sets the active oracleEndpoint', async () => {
+      // Arrange
+      updateStub.resolves(true)
+
+      // Act
+      const result = await oracleEndpoint.setIsActiveOracleEndpoint('USD', true)
+
+      // Assert
+      expect(updateStub.calledOnce).toBe(true)
+      expect(result).toBe(true)
+    })
+
+    it('fails to set the active oracleEndpoint', async () => {
+      // Arrange
+      updateStub.throws(new Error("failed to set active oracle endpoint"))
+
+      // Act
+      const action = async () => await oracleEndpoint.setIsActiveOracleEndpoint('USD', true)
+
+      // Assert
+      await expect(action()).rejects.toThrow()
+    })
   })
 
   describe('destroyOracleEndpointById', () => {
-    it.todo('destroys the oracleEndpoint by Id')
-    it.todo('fails to destroy the oracleEndpoint')
+    let updateStub
+
+    beforeEach(() => {
+      updateStub = sandbox.stub()
+      Db.oracleEndpoint = {
+        update: updateStub
+      }
+    })
+
+    it('destroys the oracleEndpoint by Id', async () => {
+      // Arrange
+      updateStub.resolves(true)
+
+      // Act
+      const result = await oracleEndpoint.destroyOracleEndpointById('1')
+
+      // Assert
+      expect(updateStub.calledOnce).toBe(true)
+      expect(result).toBe(true)
+    })
+
+    it('fails to destroy the oracleEndpoint', async () => {
+      // Arrange
+      updateStub.throws(new Error("failed to set active oracle endpoint"))
+
+      // Act
+      const action = async () => await oracleEndpoint.destroyOracleEndpointById('1')
+
+      // Assert
+      await expect(action()).rejects.toThrow()
+    })
   })
 })
