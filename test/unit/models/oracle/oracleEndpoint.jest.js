@@ -33,7 +33,6 @@ const Mockgen = require('../../../util/mockgen.js')
 const Helper = require('../../../util/helper')
 const Db = require('../../../../src/lib/db')
 const initServer = require('../../../../src/server').initialize
-// const { getEndpointTypeByType } = require('../../../../src/models/endpointType')
 const oracleEndpoint = require('../../../../src/models/oracle/oracleEndpoint')
 
 let sandbox
