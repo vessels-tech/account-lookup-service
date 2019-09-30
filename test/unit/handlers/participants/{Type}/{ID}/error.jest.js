@@ -39,16 +39,15 @@ const src = `../../../../../../src`
 const initServer = require(`${src}/server`).initialize
 const Db = require(`${src}/lib/db`)
 const oracleEndpoint = require(`${src}/models/oracle`)
-const parties = require(`${src}/domain/parties`)
-const participant = require(`${src}/models/participantEndpoint/facade`)
-const ErrHandler = require(`${src}/handlers/parties/{Type}/{ID}/error`)
+const participants = require(`${src}/domain/participants`)
+const ErrHandler = require(`${src}/handlers/participants/{Type}/{ID}/error`)
 const Helper = require('../../../../../util/helper')
 
 
 let server
 let sandbox
 
-describe('/parties/{Type}/{ID}/error', () => {
+describe('/participants/{Type}/{ID}/error', () => {
   beforeAll(async () => {
     sandbox = Sinon.createSandbox()
     sandbox.stub(Db, 'connect').returns(Promise.resolve({}))
@@ -69,23 +68,23 @@ describe('/parties/{Type}/{ID}/error', () => {
       })
     }
 
-    const mock = await Helper.generateMockRequest('/parties/{Type}/{ID}/error', 'put')
+    const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}/error', 'put')
     const options = {
       method: 'put',
       url: mock.request.path,
-      headers: Helper.defaultStandardHeaders('parties')
+      headers: Helper.defaultStandardHeaders('participants')
     }
-    sandbox.stub(parties, 'putPartiesErrorByTypeAndID').returns({})
+    sandbox.stub(participants, 'putParticipantsErrorByTypeAndID').returns({})
 
     // Act
-    ErrHandler.put(mock.request, handler)
+    await ErrHandler.put(mock.request, handler)
 
     // Assert
-    expect(codeStub.calledWith(200)).toBe(true)
-    parties.putPartiesErrorByTypeAndID.restore()
+    expect(codeStub.calledWith(202)).toBe(true)
+    participants.putParticipantsErrorByTypeAndID.restore()
   })
 
-  it('handles error when putPartiesErrorByTypeAndID fails', async () => {
+  it.only('handles error when putPartiesErrorByTypeAndID fails', async () => {
     // Arrange
     const codeStub = sandbox.stub()
     const handler = {
@@ -94,20 +93,38 @@ describe('/parties/{Type}/{ID}/error', () => {
       })
     }
 
-    const mock = await Helper.generateMockRequest('/parties/{Type}/{ID}/error', 'put')
+    const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}/error', 'put')
     const options = {
       method: 'put',
       url: mock.request.path,
-      headers: Helper.defaultStandardHeaders('parties')
+      headers: Helper.defaultStandardHeaders('participants'),
     }
-    sandbox.stub(parties, 'putPartiesErrorByTypeAndID').throws(new Error('Error in putPartiesErrorByTypeAndId'))
+    sandbox.stub(participants, 'putParticipantsErrorByTypeAndID').throws(new Error('Error in putParticipantsErrorByTypeAndID'))
+    mock.request.server = {
+      log: sandbox.stub()
+    }
 
     // Act
+    // const action = async () => {
+    //   try {
+    //     console.log("Executing put")
+    //     await ErrHandler.put(mock.request, handler)
+    //     return null
+    //   } catch (err) {
+    //     console.log("caught error in action")
+    //     return err
+    //   }
+    // }
+    // await ErrHandler.put(mock.request, handler)
     const action = async () => await ErrHandler.put(mock.request, handler)
+    // const error = await action()
+    // console.log("Error", error)
+
 
     // Assert
+    // await action()
     await expect(action()).rejects.toThrowError('Error in putPartiesErrorByTypeAndId')
-    parties.putPartiesErrorByTypeAndID.restore()
+    participants.putParticipantsErrorByTypeAndID.restore()
   })
 
 })
