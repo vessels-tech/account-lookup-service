@@ -1,3 +1,4 @@
+
 /*****
  License
  --------------
@@ -33,21 +34,21 @@ const getPort = require('get-port')
 const requestUtil = require('@mojaloop/central-services-shared').Util.Request
 const Enums = require('@mojaloop/central-services-shared').Enum
 
-const src = `../../../../../../../src`
+const src = `../../../../../../src`
 
 const initServer = require(`${src}/server`).initialize
 const Db = require(`${src}/lib/db`)
 const oracleEndpoint = require(`${src}/models/oracle`)
 const parties = require(`${src}/domain/parties`)
 const participant = require(`${src}/models/participantEndpoint/facade`)
-const ErrHandler = require(`${src}/handlers/parties/{Type}/{ID}/{SubId}/error`)
-const Helper = require('../../../../../../util/helper')
+const ErrHandler = require(`${src}/handlers/parties/{Type}/{ID}/error`)
+const Helper = require('../../../../../util/helper')
 
 
 let server
 let sandbox
 
-describe('/parties/{Type}/{ID}/{SubId}/error', () => {
+describe('/parties/{Type}/{ID}/error', () => {
   beforeAll(async () => {
     sandbox = Sinon.createSandbox()
     sandbox.stub(Db, 'connect').returns(Promise.resolve({}))
@@ -61,24 +62,50 @@ describe('/parties/{Type}/{ID}/{SubId}/error', () => {
 
   it('handles PUT /error', async () => {
     // Arrange
+    const codeStub = sandbox.stub()
     const handler = {
-      response: sandbox.stub(),
+      response: sandbox.stub().returns({
+        code: codeStub,
+      })
     }
 
-    const mock = await Helper.generateMockRequest('/parties/{Type}/{ID}/{SubId}/error', 'put')
+    const mock = await Helper.generateMockRequest('/parties/{Type}/{ID}/error', 'put')
     const options = {
       method: 'put',
       url: mock.request.path,
       headers: Helper.defaultStandardHeaders('parties')
     }
-    sandbox.stub(parties, 'getPartiesByTypeAndID').returns({})    
+    sandbox.stub(parties, 'putPartiesErrorByTypeAndID').returns({})
 
     // Act
     ErrHandler.put(mock.request, handler)
 
     // Assert
-    expect(handler.response.calledOnce).toBe(true)
+    expect(codeStub.calledWith(200)).toBe(true)
   })
 
-  
+  it.only('handles error when putPartiesErrorByTypeAndID fails', async () => {
+    // Arrange
+    const codeStub = sandbox.stub()
+    const handler = {
+      response: sandbox.stub().returns({
+        code: codeStub,
+      })
+    }
+
+    const mock = await Helper.generateMockRequest('/parties/{Type}/{ID}/error', 'put')
+    const options = {
+      method: 'put',
+      url: mock.request.path,
+      headers: Helper.defaultStandardHeaders('parties')
+    }
+    sandbox.stub(parties, 'putPartiesErrorByTypeAndID').throws(new Error('Error in putPartiesErrorByTypeAndId'))
+
+    // Act
+    const action = async () => await ErrHandler.put(mock.request, handler)
+
+    // Assert
+    await expect(action()).rejects.toThrowError('Error in putPartiesErrorByTypeAndId')
+  })
+
 })
