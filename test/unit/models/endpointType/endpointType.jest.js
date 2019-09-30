@@ -51,14 +51,14 @@ describe('endpointType model', () => {
     it('Errors when cannot find an endpointType', async () => {
       // Arrange
       const findOneStub = sandbox.stub()
-      findOneStub.throws(new Error("Error finding endpointType"))
+      findOneStub.throws(new Error('Error finding endpointType'))
       Db.endpointType = {
         findOne: findOneStub
       }
-      
+
       // Act
       const action = async () => await getEndpointTypeByType('XXX')
-      
+
       // Assert
       await expect(action()).rejects.toThrow()
     })

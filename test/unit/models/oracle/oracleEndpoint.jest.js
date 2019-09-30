@@ -51,7 +51,7 @@ const createOracleModel = {
   endpointType: 'URL',
   value: 'http://localhost:8444',
   idType: 'MSISDN',
-  currency: 'USD',
+  currency: 'USD'
 }
 
 describe('oracleEndpoint', () => {
@@ -77,10 +77,10 @@ describe('oracleEndpoint', () => {
     it('gets an oracleEndpoint by type', async () => {
       // Arrange
       queryStub.resolves(getOracleDatabaseResponse)
-      
+
       // Act
       const result = await oracleEndpoint.getOracleEndpointByType('URL')
-      
+
       // Assert
       expect(queryStub.calledOnce).toBe(true)
       expect(result).toStrictEqual(getOracleDatabaseResponse)
@@ -97,20 +97,20 @@ describe('oracleEndpoint', () => {
         })
       })
       Db.oracleEndpoint.query.callsArgWith(0, builderStub)
-      
+
       // Act
       const result = await oracleEndpoint.getOracleEndpointByType('URL')
-      
+
       // Assert
       expect(result).toStrictEqual(getOracleDatabaseResponse)
     })
 
     it('fails to get an oracleEndpoint', async () => {
       // Arrange
-      queryStub.throws(new Error("failed to get oracleEndpoint"))
+      queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.getOracleEndpointByType("123")
+      const action = async () => await oracleEndpoint.getOracleEndpointByType('123')
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -151,7 +151,7 @@ describe('oracleEndpoint', () => {
 
     it('fails to get an oracleEndpoint by type and currency', async () => {
       // Arrange
-      queryStub.throws(new Error("failed to get oracleEndpoint"))
+      queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
       const action = async () => await oracleEndpoint.getOracleEndpointByTypeAndCurrency('URL', 'USD')
@@ -195,7 +195,7 @@ describe('oracleEndpoint', () => {
 
     it('fails to get an oracleEndpoint by currency', async () => {
       // Arrange
-      queryStub.throws(new Error("failed to get oracleEndpoint"))
+      queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
       const action = async () => await oracleEndpoint.getOracleEndpointByCurrency('USD')
@@ -239,7 +239,7 @@ describe('oracleEndpoint', () => {
 
     it('fails to get an oracleEndpoint by Id', async () => {
       // Arrange
-      queryStub.throws(new Error("failed to get oracleEndpoint"))
+      queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
       const action = async () => await oracleEndpoint.getOracleEndpointById('1')
@@ -304,7 +304,7 @@ describe('oracleEndpoint', () => {
 
     it('fails to create an oracleEndpoint by Id', async () => {
       // Arrange
-      insertStub.throws(new Error("failed to create oracle endpoint"))
+      insertStub.throws(new Error('failed to create oracle endpoint'))
 
       // Act
       const action = async () => await oracleEndpoint.createOracleEndpoint(createOracleModel)
@@ -326,7 +326,7 @@ describe('oracleEndpoint', () => {
 
     it('fails to update an oracleEndpoint by Id', async () => {
       // Arrange
-      updateStub.throws(new Error("failed to create oracle endpoint"))
+      updateStub.throws(new Error('failed to create oracle endpoint'))
 
       // Act
       const action = async () => await oracleEndpoint.updateOracleEndpointById(createOracleModel)
@@ -360,7 +360,7 @@ describe('oracleEndpoint', () => {
 
     it('fails to set the active oracleEndpoint', async () => {
       // Arrange
-      updateStub.throws(new Error("failed to set active oracle endpoint"))
+      updateStub.throws(new Error('failed to set active oracle endpoint'))
 
       // Act
       const action = async () => await oracleEndpoint.setIsActiveOracleEndpoint('USD', true)
@@ -394,7 +394,7 @@ describe('oracleEndpoint', () => {
 
     it('fails to destroy the oracleEndpoint', async () => {
       // Arrange
-      updateStub.throws(new Error("failed to set active oracle endpoint"))
+      updateStub.throws(new Error('failed to set active oracle endpoint'))
 
       // Act
       const action = async () => await oracleEndpoint.destroyOracleEndpointById('1')

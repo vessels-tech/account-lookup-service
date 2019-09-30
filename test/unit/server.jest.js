@@ -37,7 +37,7 @@ const Config = require('../../src/lib/config')
 const Db = require('../../src/lib/db')
 const SetupProxy = require('../../src/server')
 
-//Jest Mocks
+// Jest Mocks
 const hapi = require('@hapi/hapi')
 jest.mock('@hapi/hapi')
 // 'hapi-openapi': HapiOpenAPIStub,
@@ -84,8 +84,8 @@ describe('server', () => {
     PathStub = Path
     ConfigStub = Config
 
-    //TODO: figure out proxyquire with jest
-    //proxyquire is overriding the imports for the following modules with the following
+    // TODO: figure out proxyquire with jest
+    // proxyquire is overriding the imports for the following modules with the following
     // SetupProxy = Proxyquire('../../src/server', {
     //   '@hapi/hapi': HapiStub,
     //   'hapi-openapi': HapiOpenAPIStub,
@@ -102,10 +102,10 @@ describe('server', () => {
   it('initialize()', async () => {
     // Arrange
     sandbox.stub(Db, 'connect').returns(Promise.resolve({}))
-  
+
     // Act
     // const server = await SetupProxy.initialize()
-    
+
     // Assert
     // expect(hapi)
     expect(true).toBe(true)
@@ -115,5 +115,3 @@ describe('server', () => {
     // test.assert(serverStub.plugins.openapi.setHost.calledOnce, 'server.plugins.openapi.setHost called once')
   })
 })
-
-

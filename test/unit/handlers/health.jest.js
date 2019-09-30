@@ -66,13 +66,11 @@ describe('/health', () => {
       url: mock.request.path,
       headers: Helper.defaultAdminHeaders()
     }
-    
+
     // Act
     const response = await server.inject(options)
 
     // Assert
     expect(response.statusCode).toBe(200)
-
   })
-
 })

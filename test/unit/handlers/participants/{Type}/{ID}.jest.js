@@ -1,4 +1,4 @@
-  /*****
+/*****
    License
   --------------
   Copyright © 2017 Bill & Melinda Gates Foundation
@@ -27,7 +27,7 @@
   --------------
   ******/
 
-  'use strict'
+'use strict'
 
 const Sinon = require('sinon')
 const Db = require('../../../../../src/lib/db')

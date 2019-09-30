@@ -70,7 +70,7 @@ describe('/parties', () => {
 
     // Act
     const response = await server.inject(options)
-    
+
     // Assert
     expect(response.statusCode).toBe(202)
     parties.getPartiesByTypeAndID.restore()
@@ -117,13 +117,13 @@ describe('/parties', () => {
       method: 'put',
       url: mock.request.path,
       headers: Helper.defaultStandardHeaders('parties'),
-      payload: mock.request.body,
+      payload: mock.request.body
     }
     sandbox.stub(parties, 'putPartiesByTypeAndID').returns({})
 
     // Act
     const response = await server.inject(options)
-    
+
     // Assert
     expect(response.statusCode).toBe(200)
   })

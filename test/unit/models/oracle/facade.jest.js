@@ -69,7 +69,6 @@ describe('Oracle Facade', () => {
   })
 
   describe('oracleRequest', () => {
-
     it('sends requests to more than 1 oracle', async () => {
       // Arrange
       const requestStub = sandbox.stub()
@@ -102,11 +101,11 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const params = {
-        Type: "request_type",
-        ID: "12345"
+        Type: 'request_type',
+        ID: '12345'
       }
       const payload = { currency: 'AUD' }
-      
+
       // Act
       const result = await OracleFacade.oracleRequest(headers, method, params, {}, payload)
 
@@ -135,8 +134,8 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const params = {
-        Type: "request_type",
-        ID: "12345"
+        Type: 'request_type',
+        ID: '12345'
       }
       const payload = { currency: 'AUD' }
 
@@ -160,8 +159,8 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const params = {
-        Type: "request_type",
-        ID: "12345"
+        Type: 'request_type',
+        ID: '12345'
       }
       const payload = { currency: 'AUD' }
 
@@ -193,8 +192,8 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const params = {
-        Type: "request_type",
-        ID: "12345"
+        Type: 'request_type',
+        ID: '12345'
       }
 
       // Act
@@ -235,8 +234,8 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const params = {
-        Type: "request_type",
-        ID: "12345"
+        Type: 'request_type',
+        ID: '12345'
       }
 
       // Act
@@ -259,8 +258,8 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const params = {
-        Type: "request_type",
-        ID: "12345"
+        Type: 'request_type',
+        ID: '12345'
       }
       const payload = {}
 
@@ -272,7 +271,6 @@ describe('Oracle Facade', () => {
     })
 
     it.todo('throws when an unknown error occours')
-
   })
 
   describe('oracleBatchRequest', () => {
@@ -308,10 +306,10 @@ describe('Oracle Facade', () => {
       const method = Enums.Http.RestMethods.GET
       const requestPayload = {}
       const payload = {}
-      
+
       // Act
       const result = await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
-      
+
       // Assert
       expect(requestStub.calledOnce).toBe(true)
     })
@@ -338,13 +336,13 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const requestPayload = {
-        currency: 'AUD',
+        currency: 'AUD'
       }
       const payload = {}
-      
+
       // Act
       const result = await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
-      
+
       // Assert
       expect(requestStub.calledOnce).toBe(true)
     })
@@ -362,19 +360,17 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
       const requestPayload = {
-        currency: 'AUD',
+        currency: 'AUD'
       }
       const payload = {}
-      
+
       // Act
-      const action = async () =>  await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
-      
+      const action = async () => await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
+
       // Assert
       await expect(action()).rejects.toThrow(new RegExp('Oracle type:.* not found'))
     })
 
     it.todo('fails when oracle type cannnot be found')
-
   })
-
 })

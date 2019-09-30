@@ -56,19 +56,19 @@ describe('/parties', () => {
   it('postParticipantsBatch returns 200', async () => {
     // Arrange
     const mock = await Helper.generateMockRequest('/participants', 'post')
-    
+
     const options = {
       method: 'post',
       url: mock.request.path,
       headers: Helper.defaultSwitchHeaders,
       payload: mock.request.body
     }
-    
+
     sandbox.stub(participants, 'postParticipantsBatch').returns({})
-    
+
     // Act
     const response = await server.inject(options)
-    
+
     // Assert
     expect(response.statusCode).toBe(200)
     participants.postParticipantsBatch.restore()

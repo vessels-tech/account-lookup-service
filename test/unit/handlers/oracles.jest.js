@@ -74,7 +74,7 @@ describe('/oracles', () => {
   it('GET /oracle', async () => {
     // Arrange
     const mock = await Helper.generateMockRequest('/oracles', 'get', false)
-    
+
     // Get the resolved path from mock request
     // Mock request Path templates({}) are resolved using path parameters
     const options = {
@@ -83,10 +83,10 @@ describe('/oracles', () => {
       headers: Helper.defaultAdminHeaders()
     }
     sandbox.stub(oracle, 'getOracle').returns(Promise.resolve(getResponse))
-    
+
     // Act
     const response = await server.inject(options)
-    
+
     // Assert
     expect(response.statusCode).toBe(200)
     oracle.getOracle.restore()
@@ -95,14 +95,14 @@ describe('/oracles', () => {
   it('GET /oracle throws on error', async () => {
     // Arrange
     const mock = await Helper.generateMockRequest('/oracles', 'get', false)
-    
+
     // Get the resolved path from mock request
     // Mock request Path templates({}) are resolved using path parameters
     const options = {
       method: 'get',
       url: mock.request.path,
       headers: Helper.defaultAdminHeaders()
-    }    
+    }
     sandbox.stub(oracle, 'getOracle').throws(new Error('Error Thrown'))
 
     // Act
@@ -130,7 +130,7 @@ describe('/oracles', () => {
       method: 'post',
       url: mock.request.path,
       headers: Helper.defaultAdminHeaders(),
-      payload: mock.request.body,
+      payload: mock.request.body
     }
 
     sandbox.stub(oracle, 'createOracle').returns(Promise.resolve({}))
@@ -146,7 +146,7 @@ describe('/oracles', () => {
   it('POST /oracle throws error', async () => {
     // Arrange
     const mock = await Helper.generateMockRequest('/oracles', 'post', false)
-    
+
     // Get the resolved path from mock request
     // Mock request Path templates({}) are resolved using path parameters
     const options = {
@@ -156,10 +156,10 @@ describe('/oracles', () => {
       payload: mock.request.body
     }
     sandbox.stub(oracle, 'createOracle').throws(new Error('Error Thrown'))
-    
+
     // Act
     const response = await server.inject(options)
-    
+
     // Assert
     expect(response.statusCode).toBe(500)
     oracle.createOracle.restore()

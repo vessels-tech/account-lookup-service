@@ -50,7 +50,7 @@ describe('/participants', () => {
     await server.stop()
     sandbox.restore()
   })
-  
+
   /**
    * summary: Participants
    * description: The HTTP request POST /participants is used to create information in the server regarding the provided list of identities. This request should be used for bulk creation of FSP information for more than one Party. The optional currency parameter should indicate that each provided Party supports the currency
@@ -62,7 +62,7 @@ describe('/participants', () => {
   it('POST /participants', async () => {
     // Arrange
     const mock = await Helper.generateMockRequest('/participants', 'post')
-    
+
     // Get the resolved path from mock request
     // Mock request Path templates({}) are resolved using path parameters
     const options = {
@@ -74,7 +74,7 @@ describe('/participants', () => {
 
     // Act
     const response = await server.inject(options)
-    
+
     // Assert
     expect(response.statusCode).toBe(400)
     await server.stop()

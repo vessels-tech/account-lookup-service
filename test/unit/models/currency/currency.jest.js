@@ -58,13 +58,13 @@ describe('currency model', () => {
       }
       const findOneStub = sandbox.stub()
       findOneStub.resolves(expected)
-      Db.currency = { 
+      Db.currency = {
         findOne: findOneStub
       }
-      
+
       // Act
       const result = await getCurrencyById('AUD')
-      
+
       // Assert
       expect(result).toMatchObject(expected)
       expect(findOneStub.calledOnce).toBe(true)
@@ -73,14 +73,14 @@ describe('currency model', () => {
     it('Errors when cannot find a currency', async () => {
       // Arrange
       const findOneStub = sandbox.stub()
-      findOneStub.throws(new Error("Error finding currency"))
+      findOneStub.throws(new Error('Error finding currency'))
       Db.currency = {
         findOne: findOneStub
       }
-      
+
       // Act
       const action = async () => await getCurrencyById('XXX')
-      
+
       // Assert
       await expect(action()).rejects.toThrow()
     })
