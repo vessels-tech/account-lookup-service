@@ -40,27 +40,9 @@ const oracleEndpoint = require('../../../../src/models/oracle')
 
 let sandbox
 
-// const getOracleDatabaseResponse = [{
-//   oracleEndpointId: 1,
-//   endpointType: 'URL',
-//   value: 'http://localhost:8444',
-//   idType: 'MSISDN',
-//   currency: 'USD',
-//   isDefault: true
-// }]
-
-// const createOracleModel = {
-//   oracleEndpointId: 1,
-//   endpointType: 'URL',
-//   value: 'http://localhost:8444',
-//   idType: 'MSISDN',
-//   currency: 'USD',
-// }
-
 describe('Oracle Facade', () => {
   beforeEach(() => {
     sandbox = Sinon.createSandbox()
-    // sandbox.stub(Db, 'connect').returns(Promise.resolve({}))
     sandbox.stub(request)
   })
 
