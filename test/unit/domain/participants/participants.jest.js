@@ -30,14 +30,20 @@
 'use strict'
 
 const Sinon = require('sinon')
-const participantsDomain = require('../../../../src/domain/participants/participants')
-const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
+
 const request = require('@mojaloop/central-services-shared').Util.Request
 const Enums = require('@mojaloop/central-services-shared').Enum
+const Util = require('@mojaloop/central-services-shared').Util
+const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
+const Logger = require('@mojaloop/central-services-logger')
+
+const participantsDomain = require('../../../../src/domain/participants/participants')
+const participant = require('../../../../src/models/participantEndpoint/facade')
+const oracle = require('../../../../src/models/oracle/facade')
 const Helper = require('../../../util/helper')
 const DB = require('../../../../src/lib/db')
 const Config = require('../../../../src/lib/config')
-const Util = require('@mojaloop/central-services-shared').Util
+
 
 let sandbox
 
@@ -56,33 +62,144 @@ describe('Participant Tests', () => {
     sandbox.restore()
   })
 
-  it('getParticipantsByTypeAndID should send a callback request to the requester', async () => {
-    // Arrange
-    request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve({}))
-    DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
-    request.sendRequest.withArgs(Helper.oracleGetCurrencyUri, Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.method, undefined, true).returns(Promise.resolve(Helper.getOracleResponse))
-    request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve(Helper.getEndPointsResponse))
-    request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.getByTypeIdCurrencyRequest.headers, Enums.Http.RestMethods.PUT, Helper.fspIdPayload).returns(Promise.resolve({}))
+  // it('getParticipantsByTypeAndID should send a callback request to the requester', async () => {
+  //   // Arrange
+  //   request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve({}))
+  //   DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
+  //   request.sendRequest.withArgs(Helper.oracleGetCurrencyUri, Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.method, undefined, true).returns(Promise.resolve(Helper.getOracleResponse))
+  //   request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve(Helper.getEndPointsResponse))
+  //   request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.getByTypeIdCurrencyRequest.headers, Enums.Http.RestMethods.PUT, Helper.fspIdPayload).returns(Promise.resolve({}))
 
-    // Act
-    await participantsDomain.getParticipantsByTypeAndID(Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.params, Helper.getByTypeIdCurrencyRequest.method, Helper.getByTypeIdCurrencyRequest.query)
+  //   // Act
+  //   await participantsDomain.getParticipantsByTypeAndID(Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.params, Helper.getByTypeIdCurrencyRequest.method, Helper.getByTypeIdCurrencyRequest.query)
 
-    // Assert
-    expect(request.sendRequest.callCount).toBe(4)
+  //   // Assert
+  //   expect(request.sendRequest.callCount).toBe(4)
+  // })
+
+  // it('postParticipantsByTypeAndID should send a callback request to the requester', async () => {
+  //   // Arrange
+  //   request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve({}))
+  //   DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
+  //   request.sendRequest.withArgs(Helper.oracleGetCurrencyUri, Helper.postByTypeIdCurrencyRequest.headers, Helper.postByTypeIdCurrencyRequest.method, undefined, true).returns(Promise.resolve())
+  //   request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve(Helper.getEndPointsResponse))
+  //   request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.getByTypeIdCurrencyRequest.headers, Enums.Http.RestMethods.POST, Helper.fspIdPayload).returns(Promise.resolve({}))
+
+  //   // Act
+  //   await participantsDomain.postParticipants(Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.params, Helper.getByTypeIdCurrencyRequest.method, Helper.getByTypeIdCurrencyRequest.query)
+
+  //   // Assert
+  //   expect(request.sendRequest.callCount).toBe(2)
+  // })
+
+  describe('getParticipantsByTypeAndID', () => {
+    beforeEach(() => {
+      sandbox.stub(participant)
+      sandbox.stub(oracle)
+    })
+
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    it('gets participants and sends callback', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleRequest = sandbox.stub().resolves({
+        data: {
+          partyList: [
+            { fspId: 'fsp1' }
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub()
+      const args = [
+        Helper.getByTypeIdCurrencyRequest.headers, 
+        Helper.getByTypeIdCurrencyRequest.params, 
+        Helper.getByTypeIdCurrencyRequest.method, 
+        Helper.getByTypeIdCurrencyRequest.query
+      ]
+
+      // Act
+      await participantsDomain.getParticipantsByTypeAndID(...args)
+      
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      const firstCallArgs = participant.sendRequest.getCall(0).args
+      expect(args[0][Enums.Http.Headers.FSPIOP.DESTINATION]).toBe('payeefsp')
+    })
+
+    it('fails with `Requester FSP not found` if `validateParticipant` fails', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves(null)
+      const logErrorStub = sandbox.stub(Logger, 'error')
+      
+      participant.sendRequest = sandbox.stub()
+      const args = [
+        Helper.getByTypeIdCurrencyRequest.headers,
+        Helper.getByTypeIdCurrencyRequest.params,
+        Helper.getByTypeIdCurrencyRequest.method,
+        Helper.getByTypeIdCurrencyRequest.query
+      ]
+
+      // Act
+      await participantsDomain.getParticipantsByTypeAndID(...args)
+
+      // Assert
+      const firstCallArgs = logErrorStub.getCall(0).args
+      expect(firstCallArgs[0]).toBe('Requester FSP not found')
+    })
+
+    it('fails when `oracleRequest` response is empty', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleRequest = sandbox.stub().resolves(null)
+      participant.sendErrorToParticipant = sandbox.stub()
+
+      const args = [
+        Helper.getByTypeIdCurrencyRequest.headers,
+        Helper.getByTypeIdCurrencyRequest.params,
+        Helper.getByTypeIdCurrencyRequest.method,
+        Helper.getByTypeIdCurrencyRequest.query
+      ]
+
+      // Act
+      await participantsDomain.getParticipantsByTypeAndID(...args)
+
+      // Assert
+      expect(participant.sendErrorToParticipant.callCount).toBe(1)
+    })
+
+    it('handles error when `sendRequest` and sendErrorToParticipant` fails', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleRequest = sandbox.stub().resolves({
+        data: {
+          partyList: [
+            { fspId: 'fsp1' }
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub().throws(new Error('sendRequest error'))
+      participant.sendErrorToParticipant = sandbox.stub().throws(new Error('sendErrorToParticipant error'))
+
+      const args = [
+        Helper.getByTypeIdCurrencyRequest.headers,
+        Helper.getByTypeIdCurrencyRequest.params,
+        Helper.getByTypeIdCurrencyRequest.method,
+        Helper.getByTypeIdCurrencyRequest.query
+      ]
+
+      // Act
+      await participantsDomain.getParticipantsByTypeAndID(...args)
+
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      expect(participant.sendErrorToParticipant.callCount).toBe(1)
+    })
   })
 
-  it('postParticipantsByTypeAndID should send a callback request to the requester', async () => {
-    // Arrange
-    request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve({}))
-    DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
-    request.sendRequest.withArgs(Helper.oracleGetCurrencyUri, Helper.postByTypeIdCurrencyRequest.headers, Helper.postByTypeIdCurrencyRequest.method, undefined, true).returns(Promise.resolve())
-    request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve(Helper.getEndPointsResponse))
-    request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.getByTypeIdCurrencyRequest.headers, Enums.Http.RestMethods.POST, Helper.fspIdPayload).returns(Promise.resolve({}))
-
-    // Act
-    await participantsDomain.postParticipants(Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.params, Helper.getByTypeIdCurrencyRequest.method, Helper.getByTypeIdCurrencyRequest.query)
-
-    // Assert
-    expect(request.sendRequest.callCount).toBe(2)
-  })
+  // describe('putParticipantsErrorByTypeAndID')
+  // describe('postParticipants')
+  // describe('postParticipantsBatch')
 })
