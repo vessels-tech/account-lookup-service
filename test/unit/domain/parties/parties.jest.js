@@ -244,10 +244,71 @@ describe('Parties Tests', () => {
   })
 
   describe('putPartiesErrorByTypeAndID', () => {
+    beforeEach(() => {
+      sandbox.stub(participant)
+    })
 
-    it.todo('succesfully sends error to the participant')
-    it.todo('sends error to the participant when there is no destination participant')
-    it.todo('handles error when `decodePayload()` fails')
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    it('succesfully sends error to the participant', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({
+        data: {
+          name: 'fsp1'
+        }
+      })
+      participant.sendErrorToParticipant = sandbox.stub().resolves()
+      const payload = JSON.stringify({ errorPayload: true })
+      const dataUri = encodePayload(payload, 'application/json')
+
+      // Act
+      await partiesDomain.putPartiesErrorByTypeAndID(Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.params, 'put', payload, dataUri)
+
+      // Assert
+      expect(participant.sendErrorToParticipant.callCount).toBe(1)
+      const sendErrorCallArgs = participant.sendErrorToParticipant.getCall(0).args
+      expect(sendErrorCallArgs[0]).toStrictEqual('payeefsp')
+    })
+
+    it('sends error to the participant when there is no destination participant', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves(null)
+      participant.sendErrorToParticipant = sandbox.stub().throws(new Error('Unknown error'))
+      const payload = JSON.stringify({ errorPayload: true })
+      const dataUri = encodePayload(payload, 'application/json')
+
+      // Act
+      await partiesDomain.putPartiesErrorByTypeAndID(Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.params, 'put', payload, dataUri)
+
+      // Assert
+      expect(participant.sendErrorToParticipant.callCount).toBe(2)
+      const sendErrorCallArgs = participant.sendErrorToParticipant.getCall(0).args
+      expect(sendErrorCallArgs[0]).toStrictEqual('payerfsp')
+    })
+
+    it('handles error when `decodePayload()` fails', async () => {
+      // Arrange)
+      participant.validateParticipant = sandbox.stub().resolves({
+        data: {
+          name: 'fsp1'
+        }
+      })
+      participant.sendErrorToParticipant = sandbox.stub().throws(new Error('Unknown error'))
+      const payload = JSON.stringify({ errorPayload: true })
+      //Send a data uri that will cause `decodePayload` to throw
+      const invalidDataUri = () => "invalid uri"
+
+      // Act
+      await partiesDomain.putPartiesErrorByTypeAndID(Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.params, payload, invalidDataUri)
+
+      // Assert
+      expect(participant.sendErrorToParticipant.callCount).toBe(1)
+      const sendErrorCallArgs = participant.sendErrorToParticipant.getCall(0).args
+      expect(sendErrorCallArgs[0]).toStrictEqual('payerfsp')  
+    })
+
     it.todo('handles error when `participant.sendErrorToParticipant()` fails')
 
   })
