@@ -75,16 +75,26 @@ describe('/participants/{Type}/{ID}/error', () => {
       headers: Helper.defaultStandardHeaders('participants')
     }
     sandbox.stub(participants, 'putParticipantsErrorByTypeAndID').returns({})
+    mock.request.server = {
+      log: sandbox.stub()
+    }
 
     // Act
     await ErrHandler.put(mock.request, handler)
 
     // Assert
-    expect(codeStub.calledWith(202)).toBe(true)
+    /*
+      Note - since the `put` function always returns a 202 response, it doesn't propagate 
+      errors properly. Instead of failing the test on an error, we can inspect the 2nd call
+      of the `log` function, and ensure it was as expected.
+    */
+
+    const secondCallArgs = mock.request.server.log.getCall(1).args
+    expect(secondCallArgs[0]).toEqual(['info'])
     participants.putParticipantsErrorByTypeAndID.restore()
   })
 
-  it.only('handles error when putPartiesErrorByTypeAndID fails', async () => {
+  it('handles error when putPartiesErrorByTypeAndID fails', async () => {
     // Arrange
     const codeStub = sandbox.stub()
     const handler = {
@@ -105,26 +115,16 @@ describe('/participants/{Type}/{ID}/error', () => {
     }
 
     // Act
-    // const action = async () => {
-    //   try {
-    //     console.log("Executing put")
-    //     await ErrHandler.put(mock.request, handler)
-    //     return null
-    //   } catch (err) {
-    //     console.log("caught error in action")
-    //     return err
-    //   }
-    // }
-    // await ErrHandler.put(mock.request, handler)
-    const action = async () => await ErrHandler.put(mock.request, handler)
-    // const error = await action()
-    // console.log("Error", error)
-
+    await ErrHandler.put(mock.request, handler)
 
     // Assert
-    // await action()
-    await expect(action()).rejects.toThrowError('Error in putPartiesErrorByTypeAndId')
+    /*
+      Note - since the `put` function always returns a 202 response, we can't catch
+      the error when testing this. Instead, we test this by ensuring the `server.log` method is called with "ERROR"
+    */
+
+    const secondCallArgs = mock.request.server.log.getCall(1).args
+    expect(secondCallArgs[0]).toEqual(['error'])
     participants.putParticipantsErrorByTypeAndID.restore()
   })
-
 })

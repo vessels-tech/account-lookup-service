@@ -59,53 +59,135 @@ describe('/participants/{Type}/{ID}', () => {
     sandbox.restore()
   })
 
-  it('getParticipantsByTypeAndID returns 202', async () => {
-    // Arrange
-    const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'get')
-    const options = {
-      method: 'get',
-      url: mock.request.path,
-      headers: Helper.defaultSwitchHeaders
-    }
-    sandbox.stub(participants, 'getParticipantsByTypeAndID').returns({})
+  describe('GET /participants', () => {    
+    it('getParticipantsByTypeAndID returns 202', async () => {
+      // Arrange
+      const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'get')
+      const options = {
+        method: 'get',
+        url: mock.request.path,
+        headers: Helper.defaultSwitchHeaders
+      }
+      sandbox.stub(participants, 'getParticipantsByTypeAndID').returns({})
+      
+      // Act
+      const response = await server.inject(options)
+      
+      // Assert
+      expect(response.statusCode).toBe(202)
+      participants.getParticipantsByTypeAndID.restore()
+    })
+    
+    it('getParticipantsByTypeAndID sends an async 3200 for invalid party id', async () => {
+      // Arrange
+      const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'get')
+      const options = {
+        method: 'get',
+        url: mock.request.path,
+        headers: Helper.defaultSwitchHeaders
+      }
+      
+      const badRequestError = ErrorHandler.Factory.createFSPIOPError(
+        ErrorHandler.Enums.FSPIOPErrorCodes.DESTINATION_COMMUNICATION_ERROR,
+        'Failed to send HTTP request to host',
+        {},
+        {},
+        [{ key: 'status', value: 400 }]
+      )
+      const stubs = [
+        sandbox.stub(participant, 'sendErrorToParticipant').returns({}),
+        sandbox.stub(participant, 'validateParticipant').returns(true),
+        sandbox.stub(oracleEndpoint, 'getOracleEndpointByType').returns(['whatever']),
+        sandbox.stub(requestUtil, 'sendRequest').throws(badRequestError)
+      ]
+      const response = await server.inject(options)
+      const errorCallStub = stubs[0]
+      
+      // Assert
+      expect(errorCallStub.args[0][2].errorInformation.errorCode).toBe('3204')
+      expect(errorCallStub.args[0][1]).toBe(Enums.EndPoints.FspEndpointTypes.FSPIOP_CALLBACK_URL_PARTICIPANT_PUT_ERROR)
+      expect(response.statusCode).toBe(202)
+      stubs.forEach(s => s.restore())
+    })
 
-    // Act
-    const response = await server.inject(options)
+    it('handles error when getParticipantsByTypeAndID fails', async () => {
+      // Arrange
+      const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'get')
+      const options = {
+        method: 'get',
+        url: mock.request.path,
+        headers: Helper.defaultSwitchHeaders
+      }
+      sandbox.stub(participants, 'getParticipantsByTypeAndID').throws(new Error("Unknown error"))
 
-    // Assert
-    expect(response.statusCode).toBe(202)
-    participants.getParticipantsByTypeAndID.restore()
+      // Act
+      const response = await server.inject(options)
+
+      // Assert
+      expect(response.statusCode).toBe(500)
+      participants.getParticipantsByTypeAndID.restore()
+    })
   })
 
-  it('getParticipantsByTypeAndID sends an async 3200 for invalid party id', async () => {
-    // Arrange
-    const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'get')
-    const options = {
-      method: 'get',
-      url: mock.request.path,
-      headers: Helper.defaultSwitchHeaders
-    }
+  describe('POST /participants', () => {    
+    it('postParticipants returns 202', async () => {
+      // Arrange
+      const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'post')
+      const options = {
+        method: 'post',
+        url: mock.request.path,
+        headers: Helper.defaultSwitchHeaders,
+        payload: mock.request.body
+      }
+      sandbox.stub(participants, 'postParticipants').returns({})
+      
+      // Act
+      const response = await server.inject(options)
+      
+      // Assert
+      expect(response.statusCode).toBe(202)
+      participants.postParticipants.restore()
+    })
+    
+    it('postParticipants returns 500 on unknown error', async () => {
+      // Arrange
+      const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'post')
+      const options = {
+        method: 'post',
+        url: mock.request.path,
+        headers: Helper.defaultSwitchHeaders,
+        payload: mock.request.body
+      }
+      sandbox.stub(participants, 'postParticipants').throws(new Error('Unknown Error'))
+      
+      // Act
+      const response = await server.inject(options)
+      
+      // Assert
+      expect(response.statusCode).toBe(500)
+      participants.postParticipants.restore()
+    })
+  })
 
-    const badRequestError = ErrorHandler.Factory.createFSPIOPError(
-      ErrorHandler.Enums.FSPIOPErrorCodes.DESTINATION_COMMUNICATION_ERROR,
-      'Failed to send HTTP request to host',
-      {},
-      {},
-      [{ key: 'status', value: 400 }]
-    )
-    const stubs = [
-      sandbox.stub(participant, 'sendErrorToParticipant').returns({}),
-      sandbox.stub(participant, 'validateParticipant').returns(true),
-      sandbox.stub(oracleEndpoint, 'getOracleEndpointByType').returns(['whatever']),
-      sandbox.stub(requestUtil, 'sendRequest').throws(badRequestError)
-    ]
-    const response = await server.inject(options)
-    const errorCallStub = stubs[0]
+  describe('PUT /participants', () => {
+    // TODO: fix this - returning h.respose with the FSPIOPError isn't compatible with Hapi
+    it.skip('throws NOT_IMPLEMENTED error', async() => {
+      // Arrange
+      const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'put')
+      const options = {
+        method: 'put',
+        url: mock.request.path,
+        headers: Helper.defaultSwitchHeaders,
+        payload: mock.request.body
+      }
 
-    // Assert
-    expect(errorCallStub.args[0][2].errorInformation.errorCode).toBe('3204')
-    expect(errorCallStub.args[0][1]).toBe(Enums.EndPoints.FspEndpointTypes.FSPIOP_CALLBACK_URL_PARTICIPANT_PUT_ERROR)
-    expect(response.statusCode).toBe(202)
-    stubs.forEach(s => s.restore())
+      // Act
+      const response = await server.inject(options)
+      console.log('response is', response.payload)
+
+      // Assert
+      expect(response.statusCode).toBe(500)
+    })
   })
 })
+    

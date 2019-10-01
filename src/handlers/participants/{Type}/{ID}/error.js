@@ -39,29 +39,18 @@ module.exports = {
    * produces: application/json
    * responses: 200, 400, 401, 403, 404, 405, 406, 501, 503
    */
-  put: async function (req, h) {
-    const metadata = `${req.method} ${req.path}`
-    try {
-      req.server.log(['info'], `received: ${metadata}. ${pp(req.params)}`)
-      await participants.putParticipantsErrorByTypeAndID(req)
-      req.server.log(['info'], `success: ${metadata}.`)
-    } catch (err) {
-      console.log("caught error!")
-      req.server.log(['error'], `ERROR - ${metadata}: ${err.stack || pp(err)}`)
-      throw ErrorHandler.Factory.reformatFSPIOPError(err)
-    }
-    // (async function () {
-    //   const metadata = `${req.method} ${req.path}`
-    //   try {
-    //     req.server.log(['info'], `received: ${metadata}. ${pp(req.params)}`)
-    //     await participants.putParticipantsErrorByTypeAndID(req)
-    //     req.server.log(['info'], `success: ${metadata}.`)
-    //   } catch (err) {
-    //     console.log("caught error!")
-    //     req.server.log(['error'], `ERROR - ${metadata}: ${err.stack || pp(err)}`)
-    //     throw ErrorHandler.Factory.reformatFSPIOPError(err)
-    //   }
-    // })()
+  put: function (req, h) {
+    (async function () {
+      const metadata = `${req.method} ${req.path}`
+      try {
+        req.server.log(['info'], `received: ${metadata}. ${pp(req.params)}`)
+        await participants.putParticipantsErrorByTypeAndID(req)
+        req.server.log(['info'], `success: ${metadata}.`)
+      } catch (err) {
+        req.server.log(['error'], `ERROR - ${metadata}: ${pp(err)}`)
+        throw ErrorHandler.Factory.reformatFSPIOPError(err)
+      }
+    })()
     return h.response().code(202)
   }
 }
