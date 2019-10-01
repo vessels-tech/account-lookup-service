@@ -30,14 +30,23 @@
 'use strict'
 
 const Sinon = require('sinon')
+
 const request = require('@mojaloop/central-services-shared').Util.Request
 const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 const Enums = require('@mojaloop/central-services-shared').Enum
 const Util = require('@mojaloop/central-services-shared').Util
+const Logger = require('@mojaloop/central-services-logger')
+const { 
+  encodePayload, 
+  decodePayload
+} = require('@mojaloop/central-services-shared').Util.StreamingProtocol
+
 const Helper = require('../../../util/helper')
 const DB = require('../../../../src/lib/db')
 const partiesDomain = require('../../../../src/domain/parties/parties')
 const Config = require('../../../../src/lib/config')
+const participant = require('../../../../src/models/participantEndpoint/facade')
+const oracle = require('../../../../src/models/oracle/facade')
 
 let sandbox
 
@@ -56,33 +65,190 @@ describe('Parties Tests', () => {
     sandbox.restore()
   })
 
-  it('getPartiesByTypeAndID should send a callback request to the requester', async () => {
-    // Arrange
-    request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve({}))
-    DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
-    request.sendRequest.withArgs(Helper.oracleGetPartiesUri, Helper.getByTypeIdRequest.headers, Helper.getByTypeIdRequest.method, undefined, true).returns(Promise.resolve(Helper.getOracleResponse))
-    request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve(Helper.getEndPointsResponse))
-    request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.getByTypeIdRequest.headers, Enums.Http.RestMethods.GET, Helper.fspIdPayload).returns(Promise.resolve({}))
+  describe('getPartiesByTypeAndID', () => {
+    beforeEach(() => {
+      sandbox.stub(participant)
+    })
 
-    // Act
-    await partiesDomain.getPartiesByTypeAndID(Helper.getByTypeIdRequest.headers, Helper.getByTypeIdRequest.params, Helper.getByTypeIdRequest.method, Helper.getByTypeIdRequest.query)
+    afterEach(() => {
+      sandbox.restore()
+    })
 
-    // Assert
-    expect(request.sendRequest.callCount).toBe(4)
+    it('handles error case where destination header is missing', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().returns({})
+      sandbox.stub(oracle, 'oracleRequest').returns({
+        data: {
+          partyList: [
+            { fspId: 'fsp1'}
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub().resolves()
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'payerfsp'
+      }
+      const expectedHeaders = {
+        ...headers,
+        'fspiop-source': 'payerfsp',
+        'fspiop-destination': 'fsp1'
+      }
+
+      // Act
+      await partiesDomain.getPartiesByTypeAndID(headers, Helper.getByTypeIdRequest.params, Helper.getByTypeIdRequest.method, Helper.getByTypeIdRequest.query)
+
+      // Assert
+      const lastCallHeaderArgs = participant.sendRequest.getCall(0).args
+      expect(participant.sendRequest.callCount).toBe(1)
+      expect(lastCallHeaderArgs[0]).toStrictEqual(expectedHeaders)
+      expect(lastCallHeaderArgs[1]).toBe('fsp1')
+    })
+
+    it('handles error when `participant.validateParticipant()`cannot be found', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves(null)
+      participant.sendErrorToParticipant = sandbox.stub().resolves(null)
+      const loggerStub = sandbox.stub(Logger, 'error')
+      
+      // Act
+      await partiesDomain.getPartiesByTypeAndID(Helper.getByTypeIdRequest.headers, Helper.getByTypeIdRequest.params, Helper.getByTypeIdRequest.method, Helper.getByTypeIdRequest.query)
+
+      // Assert
+      /*
+        The function catches all exceptions. The only way to inspect what happens
+        in the error cases is by mocking out the logger and ensuring it gets
+        called correctly
+      */
+      const firstCallArgs = loggerStub.getCall(0).args
+      const secondCallArgs = loggerStub.getCall(1).args
+      expect(firstCallArgs[0]).toBe('Requester FSP not found')
+      expect(secondCallArgs[0].name).toBe('FSPIOPError')
+    })
+
+    it('handles error when `participant.validateParticipant()`cannot be found and `sendErrorToParticipant()` fails', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().returns({})
+      sandbox.stub(oracle, 'oracleRequest').returns({
+        data: {
+          partyList: [
+            { fspId: 'fsp1' }
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub().throws(new Error('Error sending request'))
+      participant.sendErrorToParticipant = sandbox.stub().throws(new Error('Error sending Error'))
+      const loggerStub = sandbox.stub(Logger, 'error')
+
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'payerfsp',
+        // Also test the empty DESTINATION header case
+        'fspiop-destination': null
+      }
+
+      // Act
+      await partiesDomain.getPartiesByTypeAndID(headers, Helper.getByTypeIdRequest.params, Helper.getByTypeIdRequest.method, Helper.getByTypeIdRequest.query)
+
+      // Assert
+      /*
+        The function catches all exceptions. The only way to inspect what happens
+        in the error cases is by mocking out the logger and ensuring it gets
+        called correctly
+      */
+      const firstCallArgs = loggerStub.getCall(0).args
+      const secondCallArgs = loggerStub.getCall(1).args
+      expect(firstCallArgs[0].name).toBe('Error')
+      expect(secondCallArgs[0].name).toBe('Error')
+      expect(loggerStub.callCount).toBe(2)
+    })
   })
 
-  it('getPartiesByTypeAndID should send a callback request to the requester', async () => {
-    // Arrange
-    request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders).returns(Promise.resolve({}))
-    DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
-    request.sendRequest.withArgs(Helper.oracleGetPartiesUri, Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.method, undefined, true).returns(Promise.resolve())
-    request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders).returns(Promise.resolve(Helper.getEndPointsResponse))
-    request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.putByTypeIdRequest.headers, Enums.Http.RestMethods.PUT, Helper.fspIdPayload).returns(Promise.resolve({}))
+  describe('putPartiesByTypeAndID', () => {
+    beforeEach(() => {
+      sandbox.stub(participant)
+    })
 
-    // Act
-    await partiesDomain.getPartiesByTypeAndID(Helper.getByTypeIdRequest.headers, Helper.getByTypeIdRequest.params, Helper.getByTypeIdRequest.method, Helper.getByTypeIdRequest.query)
+    afterEach(() => {
+      sandbox.restore()
+    })
 
-    // Assert
-    expect(request.sendRequest.callCount).toBe(4)
+    it('successfully sends the callback to the participant', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({
+        data: {
+          name: 'fsp1'
+        }
+      })
+      participant.sendRequest = sandbox.stub().resolves()
+      const payload = JSON.stringify({ testPayload: true })
+      const dataUri = encodePayload(payload, 'application/json')
+
+      // Act
+      await partiesDomain.putPartiesByTypeAndID(Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.params, 'put', payload, dataUri)
+
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      const sendRequestCallArgs = participant.sendRequest.getCall(0).args
+      expect(sendRequestCallArgs[1]).toStrictEqual('fsp1')
+      participant.sendRequest.reset()
+    })
+
+    it('handles error when `participant.validateParticipant()` returns no participant', async () => {
+      // Arrange
+      const loggerStub = sandbox.stub(Logger, 'error')
+      participant.sendErrorToParticipant = sandbox.stub().resolves()
+
+      const payload = JSON.stringify({ testPayload: true })
+      const dataUri = encodePayload(payload, 'application/json')
+
+      // Act
+      await partiesDomain.putPartiesByTypeAndID(Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.params, 'put', payload, dataUri)
+
+      // Assert
+      expect(participant.sendErrorToParticipant.callCount).toBe(1)
+      const firstLoggerCallArgs = loggerStub.getCall(0).args
+      expect(firstLoggerCallArgs[0]).toStrictEqual('Requester FSP not found')
+      loggerStub.reset()
+      participant.sendErrorToParticipant.reset()
+    })
+
+    it('handles error when `participant.validateParticipant()` is found and `sendErrorToParticipant()` fails', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub()
+      participant.validateParticipant.withArgs('payerfsp')
+        .resolves({
+          data: {
+            name: 'fsp1'
+          }
+        })
+      participant.validateParticipant.withArgs('payeefsp').resolves(null)
+      participant.sendErrorToParticipant = sandbox.stub().throws('Error in sendErrorToParticipant')
+
+      const payload = JSON.stringify({ testPayload: true })
+      const dataUri = encodePayload(payload, 'application/json')
+
+      // Act
+      await partiesDomain.putPartiesByTypeAndID(Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.params, 'put', payload, dataUri)
+
+      // Assert
+      expect(participant.validateParticipant.callCount).toBe(2)
+      expect(participant.sendErrorToParticipant.callCount).toBe(2)
+      participant.validateParticipant.reset()
+      participant.sendErrorToParticipant.reset()
+    })
+  })
+
+  describe('putPartiesErrorByTypeAndID', () => {
+
+    it.todo('succesfully sends error to the participant')
+    it.todo('sends error to the participant when there is no destination participant')
+    it.todo('handles error when `decodePayload()` fails')
+    it.todo('handles error when `participant.sendErrorToParticipant()` fails')
+
   })
 })
