@@ -27,19 +27,12 @@
 'use strict'
 
 const Sinon = require('sinon')
-const ErrorHandler = require('@mojaloop/central-services-error-handling')
-const Logger = require('@mojaloop/central-services-logger')
 const getPort = require('get-port')
-const requestUtil = require('@mojaloop/central-services-shared').Util.Request
-const Enums = require('@mojaloop/central-services-shared').Enum
 
 const src = '../../../../../../../src'
-
 const initServer = require(`${src}/server`).initialize
 const Db = require(`${src}/lib/db`)
-const oracleEndpoint = require(`${src}/models/oracle`)
 const parties = require(`${src}/domain/parties`)
-const participant = require(`${src}/models/participantEndpoint/facade`)
 const ErrHandler = require(`${src}/handlers/parties/{Type}/{ID}/{SubId}/error`)
 const Helper = require('../../../../../../util/helper')
 
@@ -65,11 +58,6 @@ describe('/parties/{Type}/{ID}/{SubId}/error', () => {
     }
 
     const mock = await Helper.generateMockRequest('/parties/{Type}/{ID}/{SubId}/error', 'put')
-    const options = {
-      method: 'put',
-      url: mock.request.path,
-      headers: Helper.defaultStandardHeaders('parties')
-    }
     sandbox.stub(parties, 'getPartiesByTypeAndID').returns({})
 
     // Act

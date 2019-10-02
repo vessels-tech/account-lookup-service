@@ -447,10 +447,6 @@ describe('Participant Tests', () => {
         date: '2019-05-24 08:52:19',
         'fspiop-source': 'fsp1'
       }
-      const params = {
-        ID: '123456',
-        Type: 'UNKNOWN_TYPE'
-      }
       const payload = {
         requestId: '1234-5678',
         currency: 'USD',
@@ -499,10 +495,6 @@ describe('Participant Tests', () => {
         date: '2019-05-24 08:52:19',
         'fspiop-source': 'fsp1'
       }
-      const params = {
-        ID: '123456',
-        Type: 'UNKNOWN_TYPE'
-      }
       const payload = {
         requestId: '1234-5678',
         currency: 'USD',
@@ -549,10 +541,6 @@ describe('Participant Tests', () => {
         'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
         date: '2019-05-24 08:52:19',
         'fspiop-source': 'fsp1'
-      }
-      const params = {
-        ID: '123456',
-        Type: 'UNKNOWN_TYPE'
       }
       const payload = {
         requestId: '1234-5678',

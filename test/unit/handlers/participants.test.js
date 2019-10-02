@@ -31,7 +31,6 @@
 
 const Sinon = require('sinon')
 const initServer = require('../../../src/server').initialize
-const Mockgen = require('../../util/mockgen')
 const Helper = require('../../util/helper')
 const Db = require('../../../src/lib/db')
 const getPort = require('get-port')

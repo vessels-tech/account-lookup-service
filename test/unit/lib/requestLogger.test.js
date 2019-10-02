@@ -26,12 +26,8 @@
 
 'use strict'
 
-const getPort = require('get-port')
 const Sinon = require('sinon')
 const Util = require('util')
-const Enums = require('@mojaloop/central-services-shared').Enum
-const request = require('@mojaloop/central-services-shared').Util.Request
-const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 
 const requestLogger = require('../../../src/lib/requestLogger')
 const Logger = require('@mojaloop/central-services-logger')

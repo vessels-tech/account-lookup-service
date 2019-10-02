@@ -26,15 +26,10 @@
 
 'use strict'
 
-const getPort = require('get-port')
 const Sinon = require('sinon')
 const Enums = require('@mojaloop/central-services-shared').Enum
 const request = require('@mojaloop/central-services-shared').Util.Request
 
-const Mockgen = require('../../../util/mockgen.js')
-const Helper = require('../../../util/helper')
-const Db = require('../../../../src/lib/db')
-const initServer = require('../../../../src/server').initialize
 const OracleFacade = require('../../../../src/models/oracle/facade')
 const oracleEndpoint = require('../../../../src/models/oracle')
 
@@ -89,7 +84,7 @@ describe('Oracle Facade', () => {
       const payload = { currency: 'AUD' }
 
       // Act
-      const result = await OracleFacade.oracleRequest(headers, method, params, {}, payload)
+      await OracleFacade.oracleRequest(headers, method, params, {}, payload)
 
       // Assert
       expect(requestStub.calledOnce).toBe(true)
@@ -122,7 +117,7 @@ describe('Oracle Facade', () => {
       const payload = { currency: 'AUD' }
 
       // Act
-      const result = await OracleFacade.oracleRequest(headers, method, params, {}, payload)
+      await OracleFacade.oracleRequest(headers, method, params, {}, payload)
 
       // Assert
       expect(requestStub.calledOnce).toBe(true)
@@ -173,13 +168,9 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.SOURCE] = 'fsp01'
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
-      const params = {
-        Type: 'request_type',
-        ID: '12345'
-      }
 
       // Act
-      const result = await OracleFacade.oracleRequest(headers, method)
+      await OracleFacade.oracleRequest(headers, method)
 
       // Assert
       expect(requestStub.calledOnce).toBe(true)

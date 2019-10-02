@@ -29,7 +29,6 @@
 
 'use strict'
 
-const Mockgen = require('../../util/mockgen.js')
 const Helper = require('../../util/helper')
 const Db = require('../../../src/lib/db')
 const initServer = require('../../../src/server').initialize

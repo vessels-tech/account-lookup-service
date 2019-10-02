@@ -27,7 +27,6 @@
 'use strict'
 
 const Sinon = require('sinon')
-const Enums = require('@mojaloop/central-services-shared').Enum
 const request = require('@mojaloop/central-services-shared').Util.Request
 const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 

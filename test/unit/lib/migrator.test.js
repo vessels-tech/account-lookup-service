@@ -26,15 +26,10 @@
 
 'use strict'
 
-const getPort = require('get-port')
 const Sinon = require('sinon')
-const Enums = require('@mojaloop/central-services-shared').Enum
-const request = require('@mojaloop/central-services-shared').Util.Request
-const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 const Migrations = require('@mojaloop/central-services-database').Migrations
 
 const Migrator = require('../../../src/lib/migrator')
-const Knexfile = require('../../../config/knexfile')
 
 let sandbox
 

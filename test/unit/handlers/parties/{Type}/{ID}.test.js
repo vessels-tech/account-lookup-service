@@ -30,10 +30,8 @@
 'use strict'
 
 const Sinon = require('sinon')
-const Mockgen = require('../../../../util/mockgen.js')
 const initServer = require('../../../../../src/server').initialize
 const Db = require('../../../../../src/lib/db')
-const Logger = require('@mojaloop/central-services-logger')
 const oracleEndpoint = require('../../../../../src/models/oracle')
 const parties = require('../../../../../src/domain/parties')
 const participant = require('../../../../../src/models/participantEndpoint/facade')

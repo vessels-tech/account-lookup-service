@@ -26,13 +26,9 @@
 
 'use strict'
 
-const getPort = require('get-port')
 const Sinon = require('sinon')
 
-const Mockgen = require('../../../util/mockgen.js')
-const Helper = require('../../../util/helper')
 const Db = require('../../../../src/lib/db')
-const initServer = require('../../../../src/server').initialize
 const { getCurrencyById } = require('../../../../src/models/currency')
 
 let sandbox

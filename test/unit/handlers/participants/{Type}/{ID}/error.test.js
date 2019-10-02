@@ -28,17 +28,12 @@
 'use strict'
 
 const Sinon = require('sinon')
-const ErrorHandler = require('@mojaloop/central-services-error-handling')
-const Logger = require('@mojaloop/central-services-logger')
 const getPort = require('get-port')
-const requestUtil = require('@mojaloop/central-services-shared').Util.Request
-const Enums = require('@mojaloop/central-services-shared').Enum
 
 const src = '../../../../../../src'
 
 const initServer = require(`${src}/server`).initialize
 const Db = require(`${src}/lib/db`)
-const oracleEndpoint = require(`${src}/models/oracle`)
 const participants = require(`${src}/domain/participants`)
 const ErrHandler = require(`${src}/handlers/participants/{Type}/{ID}/error`)
 const Helper = require('../../../../../util/helper')
@@ -68,11 +63,6 @@ describe('/participants/{Type}/{ID}/error', () => {
     }
 
     const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}/error', 'put')
-    const options = {
-      method: 'put',
-      url: mock.request.path,
-      headers: Helper.defaultStandardHeaders('participants')
-    }
     sandbox.stub(participants, 'putParticipantsErrorByTypeAndID').returns({})
     mock.request.server = {
       log: sandbox.stub()
@@ -103,11 +93,6 @@ describe('/participants/{Type}/{ID}/error', () => {
     }
 
     const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}/error', 'put')
-    const options = {
-      method: 'put',
-      url: mock.request.path,
-      headers: Helper.defaultStandardHeaders('participants')
-    }
     sandbox.stub(participants, 'putParticipantsErrorByTypeAndID').throws(new Error('Error in putParticipantsErrorByTypeAndID'))
     mock.request.server = {
       log: sandbox.stub()

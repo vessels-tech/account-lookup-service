@@ -33,12 +33,10 @@ const Sinon = require('sinon')
 
 const request = require('@mojaloop/central-services-shared').Util.Request
 const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
-const Enums = require('@mojaloop/central-services-shared').Enum
 const Util = require('@mojaloop/central-services-shared').Util
 const Logger = require('@mojaloop/central-services-logger')
 const {
-  encodePayload,
-  decodePayload
+  encodePayload
 } = require('@mojaloop/central-services-shared').Util.StreamingProtocol
 
 const Helper = require('../../../util/helper')

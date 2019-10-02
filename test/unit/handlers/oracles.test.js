@@ -29,7 +29,6 @@
 
 'use strict'
 
-const Mockgen = require('../../util/mockgen.js')
 const oracle = require('../../../src/domain/oracle')
 const Sinon = require('sinon')
 const Helper = require('../../util/helper')
