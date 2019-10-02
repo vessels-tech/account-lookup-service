@@ -36,6 +36,8 @@ const Enums = require('@mojaloop/central-services-shared').Enum
 const Util = require('@mojaloop/central-services-shared').Util
 const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 const Logger = require('@mojaloop/central-services-logger')
+const ErrorHandler = require('@mojaloop/central-services-error-handling')
+
 
 const participantsDomain = require('../../../../src/domain/participants/participants')
 const participant = require('../../../../src/models/participantEndpoint/facade')
@@ -48,52 +50,11 @@ const Config = require('../../../../src/lib/config')
 let sandbox
 
 describe('Participant Tests', () => {
-  beforeEach(async () => {
-    await Endpoints.initializeCache(Config.ENDPOINT_CACHE_CONFIG)
-    sandbox = Sinon.createSandbox()
-    sandbox.stub(request)
-    sandbox.stub(Util.Http, 'SwitchDefaultHeaders').returns(Helper.defaultSwitchHeaders)
-    DB.oracleEndpoint = {
-      query: sandbox.stub()
-    }
-  })
-
-  afterEach(() => {
-    sandbox.restore()
-  })
-
-  // it('getParticipantsByTypeAndID should send a callback request to the requester', async () => {
-  //   // Arrange
-  //   request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve({}))
-  //   DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
-  //   request.sendRequest.withArgs(Helper.oracleGetCurrencyUri, Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.method, undefined, true).returns(Promise.resolve(Helper.getOracleResponse))
-  //   request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve(Helper.getEndPointsResponse))
-  //   request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.getByTypeIdCurrencyRequest.headers, Enums.Http.RestMethods.PUT, Helper.fspIdPayload).returns(Promise.resolve({}))
-
-  //   // Act
-  //   await participantsDomain.getParticipantsByTypeAndID(Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.params, Helper.getByTypeIdCurrencyRequest.method, Helper.getByTypeIdCurrencyRequest.query)
-
-  //   // Assert
-  //   expect(request.sendRequest.callCount).toBe(4)
-  // })
-
-  // it('postParticipantsByTypeAndID should send a callback request to the requester', async () => {
-  //   // Arrange
-  //   request.sendRequest.withArgs(Helper.validatePayerFspUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve({}))
-  //   DB.oracleEndpoint.query.returns(Helper.getOracleEndpointDatabaseResponse)
-  //   request.sendRequest.withArgs(Helper.oracleGetCurrencyUri, Helper.postByTypeIdCurrencyRequest.headers, Helper.postByTypeIdCurrencyRequest.method, undefined, true).returns(Promise.resolve())
-  //   request.sendRequest.withArgs(Helper.getPayerfspEndpointsUri, Helper.defaultSwitchHeaders, Helper.defaultSwitchHeaders['fspiop-destination'], Helper.defaultSwitchHeaders['fspiop-source']).returns(Promise.resolve(Helper.getEndPointsResponse))
-  //   request.sendRequest.withArgs(Helper.getEndPointsResponse.data[0].value, Helper.getByTypeIdCurrencyRequest.headers, Enums.Http.RestMethods.POST, Helper.fspIdPayload).returns(Promise.resolve({}))
-
-  //   // Act
-  //   await participantsDomain.postParticipants(Helper.getByTypeIdCurrencyRequest.headers, Helper.getByTypeIdCurrencyRequest.params, Helper.getByTypeIdCurrencyRequest.method, Helper.getByTypeIdCurrencyRequest.query)
-
-  //   // Assert
-  //   expect(request.sendRequest.callCount).toBe(2)
-  // })
-
   describe('getParticipantsByTypeAndID', () => {
+    let sandbox
+
     beforeEach(() => {
+      sandbox = Sinon.createSandbox()
       sandbox.stub(participant)
       sandbox.stub(oracle)
     })
@@ -127,6 +88,39 @@ describe('Participant Tests', () => {
       expect(participant.sendRequest.callCount).toBe(1)
       const firstCallArgs = participant.sendRequest.getCall(0).args
       expect(args[0][Enums.Http.Headers.FSPIOP.DESTINATION]).toBe('payeefsp')
+    })
+
+    it('gets participants and sends callback when `fspiop-dest` is not set', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleRequest = sandbox.stub().resolves({
+        data: {
+          partyList: [
+            { fspId: 'fsp1' }
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub()
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'payerfsp'
+      }
+      const args = [
+        headers,
+        Helper.getByTypeIdCurrencyRequest.params, 
+        Helper.getByTypeIdCurrencyRequest.method, 
+        Helper.getByTypeIdCurrencyRequest.query
+      ]
+
+      // Act
+      await participantsDomain.getParticipantsByTypeAndID(...args)
+      
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      const firstCallArgs = participant.sendRequest.getCall(0).args
+      expect(firstCallArgs[0][Enums.Http.Headers.FSPIOP.DESTINATION]).toBe('fsp1')
     })
 
     it('fails with `Requester FSP not found` if `validateParticipant` fails', async () => {
@@ -199,7 +193,394 @@ describe('Participant Tests', () => {
     })
   })
 
-  // describe('putParticipantsErrorByTypeAndID')
-  // describe('postParticipants')
-  // describe('postParticipantsBatch')
+  describe('putParticipantsErrorByTypeAndID', () => {
+    let sandbox
+
+    beforeEach(() => {
+      sandbox = Sinon.createSandbox()
+    })
+
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    it('catches errors', async () => {
+      // Arrange
+      sandbox.stub(Logger)
+      Logger.info = sandbox.stub().throws(new Error('I don\'t know the point of this...'))
+      Logger.error = sandbox.stub()
+
+      // Act
+      await participantsDomain.putParticipantsErrorByTypeAndID()
+
+      // Assert
+      expect(Logger.info.callCount).toBe(1)
+      expect(Logger.error.callCount).toBe(1)
+    })
+  })
+
+  describe('postParticipants', () => {
+    let sandbox
+
+    beforeEach(() => {
+      sandbox = Sinon.createSandbox()
+    })
+
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    it('sends the request to the participant', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleRequest = sandbox.stub().resolves({
+        data: {
+          partyList: [
+            { fspId: 'fsp1' }
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub()
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'MSISDN'
+      }
+      const payload = {
+        fspId: 'fsp1',
+        currency: 'USD'
+      }
+
+      // Act
+      await participantsDomain.postParticipants(headers, 'get', params, payload)
+
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      const firstCallArgs = participant.sendRequest.getCall(0).args
+      expect(firstCallArgs[0][Enums.Http.Headers.FSPIOP.DESTINATION]).toBe('switch')
+    })
+
+    it('handles the request without fspiop-dest header', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleRequest = sandbox.stub().resolves({
+        data: {
+          partyList: [
+            { fspId: 'fsp2' }
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub()
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'MSISDN'
+      }
+      const payload = {
+        fspId: 'fsp2',
+        currency: 'USD'
+      }
+
+      // Act
+      await participantsDomain.postParticipants(headers, 'get', params, payload)
+
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      const firstCallArgs = participant.sendRequest.getCall(0).args
+      expect(firstCallArgs[0][Enums.Http.Headers.FSPIOP.DESTINATION]).toBe('fsp2')
+    })
+
+    it('handles the case where `oracleRequest` returns has no response.data', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleRequest = sandbox.stub().resolves({})
+      participant.sendErrorToParticipant = sandbox.stub()
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'MSISDN'
+      }
+      const payload = {
+        fspId: 'fsp1',
+        currency: 'USD'
+      }
+
+      // Act
+      await participantsDomain.postParticipants(headers, 'get', params, payload)
+
+      // Assert
+      expect(participant.sendErrorToParticipant.callCount).toBe(1)
+      const firstCallArgs = participant.sendErrorToParticipant.getCall(0).args
+      expect(firstCallArgs[0]).toBe('fsp1')
+    })
+
+    it('handles the case where `validateParticipant` returns null', async () => {
+      // Arrange
+      participant.validateParticipant = sandbox.stub().resolves(null)
+      sandbox.stub(Logger)
+      Logger.error = sandbox.stub()
+      participant.sendErrorToParticipant = sandbox.stub()
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'MSISDN'
+      }
+      const payload = {
+        fspId: 'fsp1',
+        currency: 'USD'
+      }
+
+      // Act
+      await participantsDomain.postParticipants(headers, 'get', params, payload)
+
+      // Assert
+      const loggerFirstCallArgs = Logger.error.getCall(0).args
+      expect(loggerFirstCallArgs[0]).toBe('Requester FSP not found')
+    })
+
+    it('handles case where type is not in `PartyAccountTypes`', async () => {
+      // Arrange
+      sandbox.stub(Logger)
+      Logger.error = sandbox.stub()
+      participant.sendErrorToParticipant = sandbox.stub()
+
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'UNKNOWN_TYPE'
+      }
+      const payload = {
+        fspId: 'fsp1',
+        currency: 'USD'
+      }
+
+      // Act
+      await participantsDomain.postParticipants(headers, 'get', params, payload)
+
+      // Assert
+      const firstCallArgs = participant.sendErrorToParticipant.getCall(0).args
+      expect(firstCallArgs[0]).toBe('fsp1')
+    })
+
+    it('handles case where type is not in `PartyAccountTypes` and `sendErrorToParticipant` fails', async () => {
+      // Arrange
+      sandbox.stub(Logger)
+      Logger.error = sandbox.stub()
+      participant.sendErrorToParticipant = sandbox.stub().throws(new Error('Error sending error to participant'))
+
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'UNKNOWN_TYPE'
+      }
+      const payload = {
+        fspId: 'fsp1',
+        currency: 'USD'
+      }
+
+      // Act
+      await participantsDomain.postParticipants(headers, 'get', params, payload)
+
+      // Assert
+      const firstCallArgs = participant.sendErrorToParticipant.getCall(0).args
+      expect(firstCallArgs[0]).toBe('fsp1')
+    })
+  })
+
+  describe('postParticipantsBatch', () => {
+    let sandbox
+
+    beforeEach(() => {
+      sandbox = Sinon.createSandbox()
+    })
+
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    it('sends a batch request to all oracles, with the given partyList', async () => {
+      // Arrange
+      sandbox.stub(Logger)
+      Logger.error = sandbox.stub()
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleBatchRequest = sandbox.stub().resolves({
+        data: {
+          partyList: [
+            { partyId: {currency: 'USD' } },
+            { partyId: {currency: 'USD' } },
+            { partyId: {currency: 'USD' } },
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub()
+
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'UNKNOWN_TYPE'
+      }
+      const payload = {
+        requestId: '1234-5678',
+        currency: 'USD',
+        partyList: [
+          { fspId: 'fsp1', partyIdType: Enums.Accounts.PartyAccountTypes.MSISDN },
+          { fspId: 'fsp1', partyIdType: Enums.Accounts.PartyAccountTypes.MSISDN },
+          { fspId: 'fsp1', partyIdType: Enums.Accounts.PartyAccountTypes.MSISDN }
+        ]
+      }
+      const expected = {
+        currency: 'USD',
+        partyList: [
+          { partyId: { currency: undefined } },
+          { partyId: { currency: undefined } },
+          { partyId: { currency: undefined } },
+        ]
+      }
+
+      // Act
+      await participantsDomain.postParticipantsBatch(headers, 'get', payload)
+      
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      const firstCallArgs = participant.sendRequest.getCall(0).args
+      expect(firstCallArgs[4]).toEqual(expected)
+    })
+
+    it('sends errors when party.fspId does not match the source and partyIdType is invalid', async () => {
+      // Arrange
+      sandbox.stub(Logger)
+      Logger.error = sandbox.stub()
+      participant.validateParticipant = sandbox.stub().resolves({})
+      oracle.oracleBatchRequest = sandbox.stub().resolves({
+        data: {
+          partyList: [
+            { partyId: {currency: 'USD' } },
+          ]
+        }
+      })
+      participant.sendRequest = sandbox.stub()
+
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'UNKNOWN_TYPE'
+      }
+      const payload = {
+        requestId: '1234-5678',
+        currency: 'USD',
+        partyList: [
+          { fspId: 'fsp1', partyIdType: Enums.Accounts.PartyAccountTypes.MSISDN },
+          { fspId: 'fsp_not_valid', partyIdType: Enums.Accounts.PartyAccountTypes.MSISDN },
+          { fspId: 'fsp_not_valid', partyIdType: 'NOT_A_VALID_PARTY_ID' }
+        ]
+      }
+      const expected = {
+        currency: 'USD',
+        partyList: [
+          ErrorHandler.Factory.createFSPIOPError(ErrorHandler.Enums.FSPIOPErrorCodes.PARTY_NOT_FOUND, undefined, undefined, undefined, [{
+            key: Enums.Accounts.PartyAccountTypes.MSISDN,
+            value: undefined
+          }]).toApiErrorObject(),
+          ErrorHandler.Factory.createFSPIOPError(ErrorHandler.Enums.FSPIOPErrorCodes.ADD_PARTY_INFO_ERROR, undefined, undefined, undefined, [{
+            key: 'NOT_A_VALID_PARTY_ID',
+            value: undefined
+          }]).toApiErrorObject(),
+          { partyId: { currency: undefined } },
+        ]
+      }
+
+      // Act
+      await participantsDomain.postParticipantsBatch(headers, 'get', payload)
+      
+      // Assert
+      expect(participant.sendRequest.callCount).toBe(1)
+      const firstCallArgs = participant.sendRequest.getCall(0).args
+      expect(firstCallArgs[4]).toEqual(expected)
+    })
+
+    it('handles error when `validateParticipant` fails and `sendErrorToParticipant` throws', async () => {
+      // Arrange
+      sandbox.stub(Logger)
+      Logger.error = sandbox.stub()
+      participant.validateParticipant = sandbox.stub().resolves(null)
+      participant.sendErrorToParticipant = sandbox.stub().throws(new Error('unknown error'))
+
+      const headers = {
+        accept: 'application/vnd.interoperability.participants+json;version=1',
+        'fspiop-destination': Enums.Http.Headers.FSPIOP.SWITCH.value,
+        'content-type': 'application/vnd.interoperability.participants+json;version=1.0',
+        date: '2019-05-24 08:52:19',
+        'fspiop-source': 'fsp1'
+      }
+      const params = {
+        ID: '123456',
+        Type: 'UNKNOWN_TYPE'
+      }
+      const payload = {
+        requestId: '1234-5678',
+        currency: 'USD',
+        partyList: [
+          { fspId: 'fsp1', partyIdType: Enums.Accounts.PartyAccountTypes.MSISDN },
+          { fspId: 'fsp_not_valid', partyIdType: Enums.Accounts.PartyAccountTypes.MSISDN },
+          { fspId: 'fsp_not_valid', partyIdType: 'NOT_A_VALID_PARTY_ID' }
+        ]
+      }
+
+      // Act
+      await participantsDomain.postParticipantsBatch(headers, 'get', payload)
+
+      // Assert
+      const firstCallArgs = Logger.error.getCall(0).args
+      const thirdCallArgs = Logger.error.getCall(2).args
+      expect(firstCallArgs[0]).toBe('Requester FSP not found')
+      expect(thirdCallArgs[0].message).toBe('unknown error')
+    })
+  })
 })
