@@ -40,8 +40,6 @@
     "test:coverage-check": "jest --coverage --testMatch '**/test/unit/**/*.test.js'",
     "test:junit": "jest --reporters=default --reporters=jest-junit --testMatch '**/test/unit/**/*.test.js'",
     "cover": "npx nyc --all report --reporter=lcov npm run test",
-    "testing": "npx ava",
-    "test:coverage-dep": "nyc ava",
     "lint": "eslint --ignore-path ../.eslintignore .",
     "migrate": "run-s migrate:latest seed:run",
     "migrate:latest": "knex $npm_package_config_knex migrate:latest",
@@ -93,9 +91,7 @@
   },
   "devDependencies": {
     "@types/jest": "24.0.18",
-    "ava": "2.4.0",
     "eslint": "6.4.0",
-    "eslint-plugin-ava": "9.0.0",
     "get-port": "5.0.0",
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
