@@ -21,6 +21,7 @@
 
  --------------
  ******/
+/* istanbul ignore file */
 
 'use strict'
 
