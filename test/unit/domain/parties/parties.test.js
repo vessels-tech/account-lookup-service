@@ -306,7 +306,5 @@ describe('Parties Tests', () => {
       const sendErrorCallArgs = participant.sendErrorToParticipant.getCall(0).args
       expect(sendErrorCallArgs[0]).toStrictEqual('payerfsp')
     })
-
-    it.todo('handles error when `participant.sendErrorToParticipant()` fails')
   })
 })

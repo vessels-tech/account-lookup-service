@@ -238,8 +238,6 @@ describe('Oracle Facade', () => {
       // Assert
       await expect(action()).rejects.toThrowError(new RegExp('(Oracle type:.*not found)'))
     })
-
-    it.todo('throws when an unknown error occours')
   })
 
   describe('oracleBatchRequest', () => {
@@ -339,7 +337,5 @@ describe('Oracle Facade', () => {
       // Assert
       await expect(action()).rejects.toThrow(new RegExp('Oracle type:.* not found'))
     })
-
-    it.todo('fails when oracle type cannnot be found')
   })
 })

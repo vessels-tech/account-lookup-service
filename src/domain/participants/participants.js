@@ -182,15 +182,12 @@ const postParticipantsBatch = async (headers, method, requestPayload) => {
       for (const party of requestPayload.partyList) {
         if (Object.values(Enums.Accounts.PartyAccountTypes).includes(party.partyIdType)) {
           party.currency = requestPayload.currency
-          console.log('fspid, source', party.fspId, headers[Enums.Http.Headers.FSPIOP.SOURCE])
           if (party.fspId === headers[Enums.Http.Headers.FSPIOP.SOURCE]) {
             if (typeMap.get(party.partyIdType)) {
-              console.log('getting party.partyIdType', party.partyIdType)
               const partyList = typeMap.get(party.partyIdType)
               partyList.push(party)
               typeMap.set(party.partyIdType, partyList)
             } else {
-              console.log('setting in typeMap')
               typeMap.set(party.partyIdType, [party])
             }
           } else {
@@ -206,7 +203,6 @@ const postParticipantsBatch = async (headers, method, requestPayload) => {
           }]).toApiErrorObject())
         }
       }
-      console.log('typeMap', typeMap)
 
       for (const [key, value] of typeMap) {
         const payload = {
