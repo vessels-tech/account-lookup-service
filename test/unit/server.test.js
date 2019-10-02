@@ -30,58 +30,58 @@
 'use strict'
 
 const Sinon = require('sinon')
-const Logger = require('@mojaloop/central-services-logger')
-const Proxyquire = require('proxyquire')
-const Path = require('path')
-const Config = require('../../src/lib/config')
+// const Logger = require('@mojaloop/central-services-logger')
+// const Proxyquire = require('proxyquire')
+// const Path = require('path')
+// const Config = require('../../src/lib/config')
 const Db = require('../../src/lib/db')
-const SetupProxy = require('../../src/server')
+// const SetupProxy = require('../../src/server')
 
 // Jest Mocks
-const hapi = require('@hapi/hapi')
-jest.mock('@hapi/hapi')
+// const hapi = require('@hapi/hapi')
+// jest.mock('@hapi/hapi')
 // 'hapi-openapi': HapiOpenAPIStub,
 // './lib/config': ConfigStub,
 // '@mojaloop/central-services-database': DbStub
 
 let sandbox
-let serverStub
-let HapiStub
-let HapiOpenAPIStub
-let PathStub
-let ConfigStub
+// let serverStub
+// let HapiStub
+// let HapiOpenAPIStub
+// let PathStub
+// let ConfigStub
 // let SetupProxy
 
 describe('server', () => {
   beforeEach(() => {
     sandbox = Sinon.createSandbox()
 
-    serverStub = {
-      register: sandbox.stub(),
-      method: sandbox.stub(),
-      start: sandbox.stub(),
-      log: sandbox.stub(),
-      plugins: {
-        openapi: {
-          setHost: Sinon.spy()
-        }
-      },
-      info: {
-        port: Config.PORT
-      },
-      ext: Sinon.spy()
-      // ext: {
-      //   type: sandbox.stub(),
-      //   method: sandbox.stub()
-      // }
-    }
-    HapiStub = {
-      Server: sandbox.stub().returns(serverStub)
-    }
+    // serverStub = {
+    //   register: sandbox.stub(),
+    //   method: sandbox.stub(),
+    //   start: sandbox.stub(),
+    //   log: sandbox.stub(),
+    //   plugins: {
+    //     openapi: {
+    //       setHost: Sinon.spy()
+    //     }
+    //   },
+    //   info: {
+    //     port: Config.PORT
+    //   },
+    //   ext: Sinon.spy()
+    //   // ext: {
+    //   //   type: sandbox.stub(),
+    //   //   method: sandbox.stub()
+    //   // }
+    // }
+    // HapiStub = {
+    //   Server: sandbox.stub().returns(serverStub)
+    // }
     // DbStub = sandbox.stub()
-    HapiOpenAPIStub = sandbox.stub()
-    PathStub = Path
-    ConfigStub = Config
+    // HapiOpenAPIStub = sandbox.stub()
+    // PathStub = Path
+    // ConfigStub = Config
 
     // TODO: figure out proxyquire with jest
     // proxyquire is overriding the imports for the following modules with the following
