@@ -78,10 +78,31 @@ describe('Oracle tests', () => {
     Db.endpointType.findOne.returns(endpointTypeResponse)
     Db.oracleEndpoint.insert.returns(true)
     Db.oracleEndpoint.query.returns(getOracleDatabaseResponse)
+    Db.oracleEndpoint.update.returns(true)
   })
 
   afterEach(() => {
     sandbox.restore()
+  })
+
+  describe('deleteOracle', () => {
+    it('should delete an oracle given an ID', async () => {
+      // Arrange
+      // Act
+      const response = await oracleDomain.deleteOracle({ID: '12345'})
+      
+      // Assert
+      expect(response).toBe(true)
+    })
+
+    it('should fail if params is undefined', async () => {
+      // Arrange
+      // Act
+      const action = async () =>  await oracleDomain.deleteOracle(undefined)
+
+      // Assert
+      await expect(action()).rejects.toThrowError(new RegExp('Cannot read property \'ID\' of undefined'))
+    })
   })
 
   describe('createOracle', () => {

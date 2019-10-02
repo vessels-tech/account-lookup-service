@@ -167,7 +167,8 @@ exports.updateOracle = async (params, payload) => {
  */
 exports.deleteOracle = async (params) => {
   try {
-    await oracleEndpoint.destroyOracleEndpointById(params.ID)
+    const res = await oracleEndpoint.destroyOracleEndpointById(params.ID)
+    console.log('resons', res)
     return true
   } catch (err) {
     Logger.error(err)
