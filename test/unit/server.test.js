@@ -51,7 +51,6 @@ let HapiOpenAPIStub
 let PathStub
 let ConfigStub
 // let SetupProxy
-let DbStub
 
 describe('server', () => {
   beforeEach(() => {
@@ -79,7 +78,7 @@ describe('server', () => {
     HapiStub = {
       Server: sandbox.stub().returns(serverStub)
     }
-    DbStub = sandbox.stub()
+    // DbStub = sandbox.stub()
     HapiOpenAPIStub = sandbox.stub()
     PathStub = Path
     ConfigStub = Config

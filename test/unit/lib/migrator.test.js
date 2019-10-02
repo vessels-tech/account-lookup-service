@@ -36,13 +36,11 @@ const Migrations = require('@mojaloop/central-services-database').Migrations
 const Migrator = require('../../../src/lib/migrator')
 const Knexfile = require('../../../config/knexfile')
 
-
 let sandbox
 
 describe('Migrator', () => {
   beforeEach(() => {
     sandbox = Sinon.createSandbox()
-    
   })
 
   afterEach(() => {
@@ -52,10 +50,10 @@ describe('Migrator', () => {
   it('runs the migration from the knexfile', async () => {
     // Arrange
     const migrateSpy = sandbox.spy(Migrations, 'migrate')
-    
+
     // Act
     Migrator.migrate()
-    
+
     // Assert
     expect(migrateSpy.calledOnce).toBe(true)
   })

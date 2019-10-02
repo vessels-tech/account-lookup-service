@@ -34,7 +34,7 @@ const getPort = require('get-port')
 const requestUtil = require('@mojaloop/central-services-shared').Util.Request
 const Enums = require('@mojaloop/central-services-shared').Enum
 
-const src = `../../../../../../src`
+const src = '../../../../../../src'
 
 const initServer = require(`${src}/server`).initialize
 const Db = require(`${src}/lib/db`)
@@ -42,7 +42,6 @@ const oracleEndpoint = require(`${src}/models/oracle`)
 const participants = require(`${src}/domain/participants`)
 const ErrHandler = require(`${src}/handlers/participants/{Type}/{ID}/error`)
 const Helper = require('../../../../../util/helper')
-
 
 let server
 let sandbox
@@ -64,7 +63,7 @@ describe('/participants/{Type}/{ID}/error', () => {
     const codeStub = sandbox.stub()
     const handler = {
       response: sandbox.stub().returns({
-        code: codeStub,
+        code: codeStub
       })
     }
 
@@ -84,7 +83,7 @@ describe('/participants/{Type}/{ID}/error', () => {
 
     // Assert
     /*
-      Note - since the `put` function always returns a 202 response, it doesn't propagate 
+      Note - since the `put` function always returns a 202 response, it doesn't propagate
       errors properly. Instead of failing the test on an error, we can inspect the 2nd call
       of the `log` function, and ensure it was as expected.
     */
@@ -99,7 +98,7 @@ describe('/participants/{Type}/{ID}/error', () => {
     const codeStub = sandbox.stub()
     const handler = {
       response: sandbox.stub().returns({
-        code: codeStub,
+        code: codeStub
       })
     }
 
@@ -107,7 +106,7 @@ describe('/participants/{Type}/{ID}/error', () => {
     const options = {
       method: 'put',
       url: mock.request.path,
-      headers: Helper.defaultStandardHeaders('participants'),
+      headers: Helper.defaultStandardHeaders('participants')
     }
     sandbox.stub(participants, 'putParticipantsErrorByTypeAndID').throws(new Error('Error in putParticipantsErrorByTypeAndID'))
     mock.request.server = {

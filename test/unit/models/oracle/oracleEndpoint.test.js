@@ -26,13 +26,9 @@
 
 'use strict'
 
-const getPort = require('get-port')
 const Sinon = require('sinon')
 
-const Mockgen = require('../../../util/mockgen.js')
-const Helper = require('../../../util/helper')
 const Db = require('../../../../src/lib/db')
-const initServer = require('../../../../src/server').initialize
 const oracleEndpoint = require('../../../../src/models/oracle/oracleEndpoint')
 
 let sandbox
@@ -110,7 +106,7 @@ describe('oracleEndpoint', () => {
       queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.getOracleEndpointByType('123')
+      const action = async () => oracleEndpoint.getOracleEndpointByType('123')
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -154,7 +150,7 @@ describe('oracleEndpoint', () => {
       queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.getOracleEndpointByTypeAndCurrency('URL', 'USD')
+      const action = async () => oracleEndpoint.getOracleEndpointByTypeAndCurrency('URL', 'USD')
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -198,7 +194,7 @@ describe('oracleEndpoint', () => {
       queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.getOracleEndpointByCurrency('USD')
+      const action = async () => oracleEndpoint.getOracleEndpointByCurrency('USD')
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -242,7 +238,7 @@ describe('oracleEndpoint', () => {
       queryStub.throws(new Error('failed to get oracleEndpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.getOracleEndpointById('1')
+      const action = async () => oracleEndpoint.getOracleEndpointById('1')
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -307,7 +303,7 @@ describe('oracleEndpoint', () => {
       insertStub.throws(new Error('failed to create oracle endpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.createOracleEndpoint(createOracleModel)
+      const action = async () => oracleEndpoint.createOracleEndpoint(createOracleModel)
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -329,7 +325,7 @@ describe('oracleEndpoint', () => {
       updateStub.throws(new Error('failed to create oracle endpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.updateOracleEndpointById(createOracleModel)
+      const action = async () => oracleEndpoint.updateOracleEndpointById(createOracleModel)
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -363,7 +359,7 @@ describe('oracleEndpoint', () => {
       updateStub.throws(new Error('failed to set active oracle endpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.setIsActiveOracleEndpoint('USD', true)
+      const action = async () => oracleEndpoint.setIsActiveOracleEndpoint('USD', true)
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -397,7 +393,7 @@ describe('oracleEndpoint', () => {
       updateStub.throws(new Error('failed to set active oracle endpoint'))
 
       // Act
-      const action = async () => await oracleEndpoint.destroyOracleEndpointById('1')
+      const action = async () => oracleEndpoint.destroyOracleEndpointById('1')
 
       // Assert
       await expect(action()).rejects.toThrow()

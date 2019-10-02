@@ -26,16 +26,11 @@
 
 'use strict'
 
-const getPort = require('get-port')
 const Sinon = require('sinon')
 const Enums = require('@mojaloop/central-services-shared').Enum
 const request = require('@mojaloop/central-services-shared').Util.Request
 const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 
-const Mockgen = require('../../../util/mockgen.js')
-const Helper = require('../../../util/helper')
-const Db = require('../../../../src/lib/db')
-const initServer = require('../../../../src/server').initialize
 const ParticipantFacade = require('../../../../src/models/participantEndpoint/facade')
 
 let sandbox
@@ -57,7 +52,7 @@ describe('Oracle Facade', () => {
       const requestStub = sandbox.stub()
       request.sendRequest = requestStub
       requestStub.resolves(true)
-      Endpoints.getEndpoint = sandbox.stub().resolves("https://example.com/12345")
+      Endpoints.getEndpoint = sandbox.stub().resolves('https://example.com/12345')
 
       const headers = {}
       const requestedParticipant = {}
@@ -76,14 +71,14 @@ describe('Oracle Facade', () => {
       const requestStub = sandbox.stub()
       request.sendRequest = requestStub
       requestStub.throws(new Error('Request failed'))
-      Endpoints.getEndpoint = sandbox.stub().resolves("https://example.com/12345")
+      Endpoints.getEndpoint = sandbox.stub().resolves('https://example.com/12345')
 
       const headers = {}
       const requestedParticipant = {}
       const endpointType = 'URL'
 
       // Act
-      const action = async () => await ParticipantFacade.sendRequest(headers, requestedParticipant, endpointType)
+      const action = async () => ParticipantFacade.sendRequest(headers, requestedParticipant, endpointType)
 
       // Assert
       await expect(action()).rejects.toThrow('Request failed')
@@ -99,7 +94,7 @@ describe('Oracle Facade', () => {
       const fspId = 'fsp1'
 
       // Act
-      const action = async () => await ParticipantFacade.validateParticipant(fspId)
+      const action = async () => ParticipantFacade.validateParticipant(fspId)
 
       // Assert
       await expect(action()).rejects.toThrow('Validate Request failed')
@@ -112,7 +107,7 @@ describe('Oracle Facade', () => {
       const requestStub = sandbox.stub()
       request.sendRequest = requestStub
       requestStub.throws(new Error('Request failed'))
-      Endpoints.getEndpoint = sandbox.stub().resolves("https://example.com/12345")
+      Endpoints.getEndpoint = sandbox.stub().resolves('https://example.com/12345')
 
       const participantName = 'fsp1'
       const endpointType = 'URL'
@@ -124,8 +119,8 @@ describe('Oracle Facade', () => {
       const payload = { requestId: '1234-5678' }
 
       // Act
-      const action = async () => await ParticipantFacade.sendErrorToParticipant(participantName, endpointType, errorInformation, headers, params, payload)
-      
+      const action = async () => ParticipantFacade.sendErrorToParticipant(participantName, endpointType, errorInformation, headers, params, payload)
+
       // Assert
       await expect(action()).rejects.toThrow('Request failed')
     })

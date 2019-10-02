@@ -33,7 +33,6 @@ const Enums = require('@mojaloop/central-services-shared').Enum
 const request = require('@mojaloop/central-services-shared').Util.Request
 const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 
-
 const requestLogger = require('../../../src/lib/requestLogger')
 const Logger = require('@mojaloop/central-services-logger')
 
@@ -52,11 +51,11 @@ describe('requestLogger', () => {
   describe('logRequest', () => {
     it('prints the request.body if it exists', async () => {
       // Arrange
-      const debugSpy = sandbox.spy(Logger, 'debug');
+      const debugSpy = sandbox.spy(Logger, 'debug')
       const req = {
         method: 'GET',
         url: {
-          path: "/123/456"
+          path: '/123/456'
         },
         query: {},
         headers: {},
@@ -65,7 +64,7 @@ describe('requestLogger', () => {
           itemB: 456
         }
       }
-     
+
       // Act
       requestLogger.logRequest(req)
 
@@ -77,7 +76,7 @@ describe('requestLogger', () => {
   describe('logResponse', () => {
     it('handles deseralizing invalid JSON', async () => {
       // Arrange
-      const infoSpy = sandbox.spy(Logger, 'info');
+      const infoSpy = sandbox.spy(Logger, 'info')
       const req = {
         response: {
           source: {
@@ -104,7 +103,7 @@ describe('requestLogger', () => {
 
     it('handles valid json', async () => {
       // Arrange
-      const infoSpy = sandbox.spy(Logger, 'info');
+      const infoSpy = sandbox.spy(Logger, 'info')
       const req = {
         response: {
           source: {
@@ -124,7 +123,7 @@ describe('requestLogger', () => {
 
     it('handles if response is null or undefined after JSON stringifying', async () => {
       // Arrange
-      const infoSpy = sandbox.spy(Logger, 'info');
+      const infoSpy = sandbox.spy(Logger, 'info')
       const req = {
         response: {
           statusCode: 500
@@ -134,7 +133,7 @@ describe('requestLogger', () => {
       requestLogger.logResponse(req)
 
       // Assert
-      const result = infoSpy.calledWith(`ALS-Trace - Response: [object Object]`)
+      const result = infoSpy.calledWith('ALS-Trace - Response: [object Object]')
       expect(result).toBe(true)
     })
   })

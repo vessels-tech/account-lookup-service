@@ -35,7 +35,7 @@ const { getPartyIdTypeByName } = require('../../../../src/models/partyIdType/par
 const Db = require('../../../../src/lib/db')
 
 describe('partyIdType Model', () => {
-  let sandbox;
+  let sandbox
 
   beforeEach(() => {
     sandbox = Sinon.createSandbox()
@@ -57,10 +57,10 @@ describe('partyIdType Model', () => {
     Db.partyIdType = {
       findOne: sandbox.stub().resolves(partyIdType)
     }
-    
+
     // Act
     const response = await getPartyIdTypeByName('MSISDN')
-    
+
     // Assert
     expect(response).toEqual(partyIdType)
   })
@@ -72,10 +72,9 @@ describe('partyIdType Model', () => {
     }
 
     // Act
-    const action = async () => await getPartyIdTypeByName('MSISDN')
+    const action = async () => getPartyIdTypeByName('MSISDN')
 
     // Assert
     await expect(action()).rejects.toThrowError(new RegExp('Error finding partyIdType'))
   })
-
 })

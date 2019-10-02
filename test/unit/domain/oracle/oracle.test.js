@@ -100,8 +100,8 @@ describe('Oracle tests', () => {
     it('should delete an oracle given an ID', async () => {
       // Arrange
       // Act
-      const response = await oracleDomain.deleteOracle({ID: '12345'})
-      
+      const response = await oracleDomain.deleteOracle({ ID: '12345' })
+
       // Assert
       expect(response).toBe(true)
     })
@@ -109,7 +109,7 @@ describe('Oracle tests', () => {
     it('should fail if params is undefined', async () => {
       // Arrange
       // Act
-      const action = async () =>  await oracleDomain.deleteOracle(undefined)
+      const action = async () => oracleDomain.deleteOracle(undefined)
 
       // Assert
       await expect(action()).rejects.toThrowError(new RegExp('Cannot read property \'ID\' of undefined'))
@@ -139,10 +139,10 @@ describe('Oracle tests', () => {
         }
       }
       const expected = {
-        currencyId: "AUD",
+        currencyId: 'AUD',
         endpointTypeId: 1,
         partyIdTypeId: 2,
-        value: "http://custom_url:8444",
+        value: 'http://custom_url:8444'
       }
 
       // Act
@@ -157,12 +157,12 @@ describe('Oracle tests', () => {
     it('handles error when oracleEndpointList is empty', async () => {
       // Arrange
       oracleEndpoint.getOracleEndpointById = sandbox.stub().resolves([])
-      const params = { ID: '12345'}
+      const params = { ID: '12345' }
       const payload = {}
-      
+
       // Act
-      const action = async () => await oracleDomain.updateOracle(params, payload)
-      
+      const action = async () => oracleDomain.updateOracle(params, payload)
+
       // Assert
       await expect(action()).rejects.toThrowError(new RegExp('Oracle not found'))
     })

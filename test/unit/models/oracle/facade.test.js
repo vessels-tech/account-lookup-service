@@ -147,7 +147,7 @@ describe('Oracle Facade', () => {
       const payload = { currency: 'AUD' }
 
       // Act
-      const action = async () => await OracleFacade.oracleRequest(headers, method, params, {}, payload)
+      const action = async () => OracleFacade.oracleRequest(headers, method, params, {}, payload)
 
       // Assert
       await expect(action()).rejects.toThrow()
@@ -215,13 +215,9 @@ describe('Oracle Facade', () => {
       headers[Enums.Http.Headers.FSPIOP.SOURCE] = 'fsp01'
       headers[Enums.Http.Headers.FSPIOP.DESTINATION] = 'fsp02'
       const method = Enums.Http.RestMethods.GET
-      const params = {
-        Type: 'request_type',
-        ID: '12345'
-      }
 
       // Act
-      const result = await OracleFacade.oracleRequest(headers, method)
+      await OracleFacade.oracleRequest(headers, method)
 
       // Assert
       expect(requestStub.calledOnce).toBe(true)
@@ -246,7 +242,7 @@ describe('Oracle Facade', () => {
       const payload = {}
 
       // Act
-      const action = async () => await OracleFacade.oracleRequest(headers, method, params, {}, payload)
+      const action = async () => OracleFacade.oracleRequest(headers, method, params, {}, payload)
 
       // Assert
       await expect(action()).rejects.toThrowError(new RegExp('(Oracle type:.*not found)'))
@@ -290,7 +286,7 @@ describe('Oracle Facade', () => {
       const payload = {}
 
       // Act
-      const result = await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
+      await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
 
       // Assert
       expect(requestStub.calledOnce).toBe(true)
@@ -323,7 +319,7 @@ describe('Oracle Facade', () => {
       const payload = {}
 
       // Act
-      const result = await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
+      await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
 
       // Assert
       expect(requestStub.calledOnce).toBe(true)
@@ -347,7 +343,7 @@ describe('Oracle Facade', () => {
       const payload = {}
 
       // Act
-      const action = async () => await OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
+      const action = async () => OracleFacade.oracleBatchRequest(headers, method, requestPayload, 'URL', payload)
 
       // Assert
       await expect(action()).rejects.toThrow(new RegExp('Oracle type:.* not found'))

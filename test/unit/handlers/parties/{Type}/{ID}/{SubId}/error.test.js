@@ -33,7 +33,7 @@ const getPort = require('get-port')
 const requestUtil = require('@mojaloop/central-services-shared').Util.Request
 const Enums = require('@mojaloop/central-services-shared').Enum
 
-const src = `../../../../../../../src`
+const src = '../../../../../../../src'
 
 const initServer = require(`${src}/server`).initialize
 const Db = require(`${src}/lib/db`)
@@ -42,7 +42,6 @@ const parties = require(`${src}/domain/parties`)
 const participant = require(`${src}/models/participantEndpoint/facade`)
 const ErrHandler = require(`${src}/handlers/parties/{Type}/{ID}/{SubId}/error`)
 const Helper = require('../../../../../../util/helper')
-
 
 let server
 let sandbox
@@ -62,7 +61,7 @@ describe('/parties/{Type}/{ID}/{SubId}/error', () => {
   it('handles PUT /error', async () => {
     // Arrange
     const handler = {
-      response: sandbox.stub(),
+      response: sandbox.stub()
     }
 
     const mock = await Helper.generateMockRequest('/parties/{Type}/{ID}/{SubId}/error', 'put')
@@ -71,7 +70,7 @@ describe('/parties/{Type}/{ID}/{SubId}/error', () => {
       url: mock.request.path,
       headers: Helper.defaultStandardHeaders('parties')
     }
-    sandbox.stub(parties, 'getPartiesByTypeAndID').returns({})    
+    sandbox.stub(parties, 'getPartiesByTypeAndID').returns({})
 
     // Act
     ErrHandler.put(mock.request, handler)
@@ -79,6 +78,4 @@ describe('/parties/{Type}/{ID}/{SubId}/error', () => {
     // Assert
     expect(handler.response.calledOnce).toBe(true)
   })
-
-  
 })

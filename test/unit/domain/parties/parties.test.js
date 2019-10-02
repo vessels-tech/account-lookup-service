@@ -36,8 +36,8 @@ const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 const Enums = require('@mojaloop/central-services-shared').Enum
 const Util = require('@mojaloop/central-services-shared').Util
 const Logger = require('@mojaloop/central-services-logger')
-const { 
-  encodePayload, 
+const {
+  encodePayload,
   decodePayload
 } = require('@mojaloop/central-services-shared').Util.StreamingProtocol
 
@@ -80,7 +80,7 @@ describe('Parties Tests', () => {
       sandbox.stub(oracle, 'oracleRequest').returns({
         data: {
           partyList: [
-            { fspId: 'fsp1'}
+            { fspId: 'fsp1' }
           ]
         }
       })
@@ -112,7 +112,7 @@ describe('Parties Tests', () => {
       participant.validateParticipant = sandbox.stub().resolves(null)
       participant.sendErrorToParticipant = sandbox.stub().resolves(null)
       const loggerStub = sandbox.stub(Logger, 'error')
-      
+
       // Act
       await partiesDomain.getPartiesByTypeAndID(Helper.getByTypeIdRequest.headers, Helper.getByTypeIdRequest.params, Helper.getByTypeIdRequest.method, Helper.getByTypeIdRequest.query)
 
@@ -297,8 +297,8 @@ describe('Parties Tests', () => {
       })
       participant.sendErrorToParticipant = sandbox.stub().throws(new Error('Unknown error'))
       const payload = JSON.stringify({ errorPayload: true })
-      //Send a data uri that will cause `decodePayload` to throw
-      const invalidDataUri = () => "invalid uri"
+      // Send a data uri that will cause `decodePayload` to throw
+      const invalidDataUri = () => 'invalid uri'
 
       // Act
       await partiesDomain.putPartiesErrorByTypeAndID(Helper.putByTypeIdRequest.headers, Helper.putByTypeIdRequest.params, payload, invalidDataUri)
@@ -306,10 +306,9 @@ describe('Parties Tests', () => {
       // Assert
       expect(participant.sendErrorToParticipant.callCount).toBe(1)
       const sendErrorCallArgs = participant.sendErrorToParticipant.getCall(0).args
-      expect(sendErrorCallArgs[0]).toStrictEqual('payerfsp')  
+      expect(sendErrorCallArgs[0]).toStrictEqual('payerfsp')
     })
 
     it.todo('handles error when `participant.sendErrorToParticipant()` fails')
-
   })
 })

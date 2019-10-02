@@ -79,7 +79,7 @@ describe('currency model', () => {
       }
 
       // Act
-      const action = async () => await getCurrencyById('XXX')
+      const action = async () => getCurrencyById('XXX')
 
       // Assert
       await expect(action()).rejects.toThrow()

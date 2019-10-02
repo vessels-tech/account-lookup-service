@@ -31,23 +31,14 @@
 
 const Sinon = require('sinon')
 
-const request = require('@mojaloop/central-services-shared').Util.Request
 const Enums = require('@mojaloop/central-services-shared').Enum
-const Util = require('@mojaloop/central-services-shared').Util
-const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 const Logger = require('@mojaloop/central-services-logger')
 const ErrorHandler = require('@mojaloop/central-services-error-handling')
-
 
 const participantsDomain = require('../../../../src/domain/participants/participants')
 const participant = require('../../../../src/models/participantEndpoint/facade')
 const oracle = require('../../../../src/models/oracle/facade')
 const Helper = require('../../../util/helper')
-const DB = require('../../../../src/lib/db')
-const Config = require('../../../../src/lib/config')
-
-
-let sandbox
 
 describe('Participant Tests', () => {
   describe('getParticipantsByTypeAndID', () => {
@@ -75,19 +66,19 @@ describe('Participant Tests', () => {
       })
       participant.sendRequest = sandbox.stub()
       const args = [
-        Helper.getByTypeIdCurrencyRequest.headers, 
-        Helper.getByTypeIdCurrencyRequest.params, 
-        Helper.getByTypeIdCurrencyRequest.method, 
+        Helper.getByTypeIdCurrencyRequest.headers,
+        Helper.getByTypeIdCurrencyRequest.params,
+        Helper.getByTypeIdCurrencyRequest.method,
         Helper.getByTypeIdCurrencyRequest.query
       ]
 
       // Act
       await participantsDomain.getParticipantsByTypeAndID(...args)
-      
+
       // Assert
       expect(participant.sendRequest.callCount).toBe(1)
       const firstCallArgs = participant.sendRequest.getCall(0).args
-      expect(args[0][Enums.Http.Headers.FSPIOP.DESTINATION]).toBe('payeefsp')
+      expect(firstCallArgs[0][Enums.Http.Headers.FSPIOP.DESTINATION]).toBe('payeefsp')
     })
 
     it('gets participants and sends callback when `fspiop-dest` is not set', async () => {
@@ -109,14 +100,14 @@ describe('Participant Tests', () => {
       }
       const args = [
         headers,
-        Helper.getByTypeIdCurrencyRequest.params, 
-        Helper.getByTypeIdCurrencyRequest.method, 
+        Helper.getByTypeIdCurrencyRequest.params,
+        Helper.getByTypeIdCurrencyRequest.method,
         Helper.getByTypeIdCurrencyRequest.query
       ]
 
       // Act
       await participantsDomain.getParticipantsByTypeAndID(...args)
-      
+
       // Assert
       expect(participant.sendRequest.callCount).toBe(1)
       const firstCallArgs = participant.sendRequest.getCall(0).args
@@ -127,7 +118,7 @@ describe('Participant Tests', () => {
       // Arrange
       participant.validateParticipant = sandbox.stub().resolves(null)
       const logErrorStub = sandbox.stub(Logger, 'error')
-      
+
       participant.sendRequest = sandbox.stub()
       const args = [
         Helper.getByTypeIdCurrencyRequest.headers,
@@ -441,9 +432,9 @@ describe('Participant Tests', () => {
       oracle.oracleBatchRequest = sandbox.stub().resolves({
         data: {
           partyList: [
-            { partyId: {currency: 'USD' } },
-            { partyId: {currency: 'USD' } },
-            { partyId: {currency: 'USD' } },
+            { partyId: { currency: 'USD' } },
+            { partyId: { currency: 'USD' } },
+            { partyId: { currency: 'USD' } }
           ]
         }
       })
@@ -474,13 +465,13 @@ describe('Participant Tests', () => {
         partyList: [
           { partyId: { currency: undefined } },
           { partyId: { currency: undefined } },
-          { partyId: { currency: undefined } },
+          { partyId: { currency: undefined } }
         ]
       }
 
       // Act
       await participantsDomain.postParticipantsBatch(headers, 'get', payload)
-      
+
       // Assert
       expect(participant.sendRequest.callCount).toBe(1)
       const firstCallArgs = participant.sendRequest.getCall(0).args
@@ -495,7 +486,7 @@ describe('Participant Tests', () => {
       oracle.oracleBatchRequest = sandbox.stub().resolves({
         data: {
           partyList: [
-            { partyId: {currency: 'USD' } },
+            { partyId: { currency: 'USD' } }
           ]
         }
       })
@@ -532,13 +523,13 @@ describe('Participant Tests', () => {
             key: 'NOT_A_VALID_PARTY_ID',
             value: undefined
           }]).toApiErrorObject(),
-          { partyId: { currency: undefined } },
+          { partyId: { currency: undefined } }
         ]
       }
 
       // Act
       await participantsDomain.postParticipantsBatch(headers, 'get', payload)
-      
+
       // Assert
       expect(participant.sendRequest.callCount).toBe(1)
       const firstCallArgs = participant.sendRequest.getCall(0).args

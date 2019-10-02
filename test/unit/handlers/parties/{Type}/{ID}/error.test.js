@@ -34,7 +34,7 @@ const getPort = require('get-port')
 const requestUtil = require('@mojaloop/central-services-shared').Util.Request
 const Enums = require('@mojaloop/central-services-shared').Enum
 
-const src = `../../../../../../src`
+const src = '../../../../../../src'
 
 const initServer = require(`${src}/server`).initialize
 const Db = require(`${src}/lib/db`)
@@ -43,7 +43,6 @@ const parties = require(`${src}/domain/parties`)
 const participant = require(`${src}/models/participantEndpoint/facade`)
 const ErrHandler = require(`${src}/handlers/parties/{Type}/{ID}/error`)
 const Helper = require('../../../../../util/helper')
-
 
 let server
 let sandbox
@@ -65,7 +64,7 @@ describe('/parties/{Type}/{ID}/error', () => {
     const codeStub = sandbox.stub()
     const handler = {
       response: sandbox.stub().returns({
-        code: codeStub,
+        code: codeStub
       })
     }
 
@@ -90,7 +89,7 @@ describe('/parties/{Type}/{ID}/error', () => {
     const codeStub = sandbox.stub()
     const handler = {
       response: sandbox.stub().returns({
-        code: codeStub,
+        code: codeStub
       })
     }
 
@@ -103,11 +102,10 @@ describe('/parties/{Type}/{ID}/error', () => {
     sandbox.stub(parties, 'putPartiesErrorByTypeAndID').throws(new Error('Error in putPartiesErrorByTypeAndId'))
 
     // Act
-    const action = async () => await ErrHandler.put(mock.request, handler)
+    const action = async () => ErrHandler.put(mock.request, handler)
 
     // Assert
     await expect(action()).rejects.toThrowError('Error in putPartiesErrorByTypeAndId')
     parties.putPartiesErrorByTypeAndID.restore()
   })
-
 })

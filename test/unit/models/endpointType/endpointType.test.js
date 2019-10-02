@@ -57,7 +57,7 @@ describe('endpointType model', () => {
       }
 
       // Act
-      const action = async () => await getEndpointTypeByType('XXX')
+      const action = async () => getEndpointTypeByType('XXX')
 
       // Assert
       await expect(action()).rejects.toThrow()
