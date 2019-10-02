@@ -170,7 +170,6 @@ describe('/participants/{Type}/{ID}', () => {
   })
 
   describe('PUT /participants', () => {
-    // TODO: fix this - returning h.respose with the FSPIOPError isn't compatible with Hapi
     it('throws NOT_IMPLEMENTED error', async () => {
       // Arrange
       const mock = await Helper.generateMockRequest('/participants/{Type}/{ID}', 'put')
@@ -185,7 +184,7 @@ describe('/participants/{Type}/{ID}', () => {
       const response = await server.inject(options)
 
       // Assert
-      expect(response.statusCode).toBe(500)
+      expect(response.statusCode).toBe(501)
     })
   })
 })
