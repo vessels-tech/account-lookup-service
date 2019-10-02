@@ -150,7 +150,7 @@ exports.updateOracle = async (params, payload) => {
       await oracleEndpoint.updateOracleEndpointById(params.ID, newOracleEntry)
       return true
     } else {
-      throw ErrorHandler.Factory.createFSPIOPError(ErrorHandler.Enums.FSPIOPErrorCodes.ADD_PARTY_INFO_ERROR, 'Oracle not found').toApiErrorObject()
+      throw ErrorHandler.Factory.createFSPIOPError(ErrorHandler.Enums.FSPIOPErrorCodes.ADD_PARTY_INFO_ERROR, 'Oracle not found')
     }
   } catch (err) {
     Logger.error(err)
@@ -168,7 +168,6 @@ exports.updateOracle = async (params, payload) => {
 exports.deleteOracle = async (params) => {
   try {
     const res = await oracleEndpoint.destroyOracleEndpointById(params.ID)
-    console.log('resons', res)
     return true
   } catch (err) {
     Logger.error(err)

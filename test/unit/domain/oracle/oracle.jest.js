@@ -31,12 +31,23 @@
 
 const Sinon = require('sinon')
 const oracleDomain = require('../../../../src/domain/oracle/oracle')
+const oracleEndpoint = require('../../../../src/models/oracle')
+const currency = require('../../../../src/models/currency')
+const partyIdType = require('../../../../src/models/partyIdType')
 const Db = require('../../../../src/lib/db')
 
 const partyIdTypeResponse = {
   partyIdTypeId: 1,
   name: 'MSISDN',
   description: 'A MSISDN (Mobile Station International Subscriber Directory Number, that is, the phone number)',
+  isActive: true,
+  createdDate: '2019-05-24 08:52:19'
+}
+
+const partyIdTypeResponseIBAN = {
+  partyIdTypeId: 2,
+  name: 'IBAN',
+  description: 'An IBAN',
   isActive: true,
   createdDate: '2019-05-24 08:52:19'
 }
@@ -105,6 +116,58 @@ describe('Oracle tests', () => {
     })
   })
 
+  describe('updateOracle', () => {
+    it('should update the oracle', async () => {
+      // Arrange
+      oracleEndpoint.getOracleEndpointById = sandbox.stub().resolves(getOracleDatabaseResponse)
+      partyIdType.getPartyIdTypeByName = sandbox.stub().resolves(partyIdTypeResponseIBAN)
+      currency.getCurrencyById = sandbox.stub().resolves({
+        currencyId: 'AUD',
+        name: 'Australian Dollars',
+        isActive: true,
+        createdDate: (new Date()).toISOString()
+      })
+      oracleEndpoint.updateOracleEndpointById = sandbox.stub()
+      const params = { ID: '12345' }
+      const payload = {
+        oracleIdType: 'IBAN',
+        isDefault: true,
+        currency: 'AUD',
+        endpoint: {
+          endpointType: 'CUSTOM_TYPE',
+          value: 'http://custom_url:8444'
+        }
+      }
+      const expected = {
+        currencyId: "AUD",
+        endpointTypeId: 1,
+        partyIdTypeId: 2,
+        value: "http://custom_url:8444",
+      }
+
+      // Act
+      await oracleDomain.updateOracle(params, payload)
+
+      // Assert
+      const firstCallArgs = oracleEndpoint.updateOracleEndpointById.getCall(0).args
+      expect(firstCallArgs[0]).toBe('12345')
+      expect(firstCallArgs[1]).toEqual(expected)
+    })
+
+    it('handles error when oracleEndpointList is empty', async () => {
+      // Arrange
+      oracleEndpoint.getOracleEndpointById = sandbox.stub().resolves([])
+      const params = { ID: '12345'}
+      const payload = {}
+      
+      // Act
+      const action = async () => await oracleDomain.updateOracle(params, payload)
+      
+      // Assert
+      await expect(action()).rejects.toThrowError(new RegExp('Oracle not found'))
+    })
+  })
+
   describe('createOracle', () => {
     it('should create an oracle when isDefault is true', async () => {
       // Arrange
@@ -141,20 +204,16 @@ describe('Oracle tests', () => {
       expect(response).toBe(true)
     })
 
-    it('should fail if `partyIdType` throws', async () => {
+    it('should fail if partyIdType throws', async () => {
       // Arrange
-      sandbox.restore()
-      Db.partyIdType = {
-        findOne: sandbox.stub()
-      }
-      Db.partyIdType.findOne.throws(new Error())
-
+      partyIdType.getPartyIdTypeByName = sandbox.stub().throws(new Error('Cannot get partyIdType'))
       const createPayload = {
         oracleIdType: 'MSISDN',
         endpoint: {
           value: 'http://localhost:8444',
           endpointType: 'URL'
-        }
+        },
+        currency: 'AUD'
       }
 
       // Act
