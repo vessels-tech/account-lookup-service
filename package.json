@@ -17,14 +17,6 @@
   "config": {
     "knex": "--knexfile ./config/knexfile.js"
   },
-  "ava": {
-    "files": [
-      "test/unit/**/**.test.js"
-    ],
-    "sources": [
-      "src/**/*.js"
-    ]
-  },
   "standard": {
     "env": [
       "jest"
@@ -42,11 +34,11 @@
     "start:admin": "node src/index.js server --admin",
     "standard": "standard",
     "dev": "nodemon src/index.js server",
-    "test": "npx ava",
-    "test:unit": "jest --testMatch '**/test/unit/**/*.jest.js'",
-    "test:coverage": "jest --coverage --coverageThreshold='{}' --testMatch '**/test/unit/**/*.jest.js'",
-    "test:coverage-check": "jest --coverage --testMatch '**/test/unit/**/*.jest.js'",
-    "test:junit": "jest --reporters=default --reporters=jest-junit --testMatch '**/test/unit/**/*.jest.js'",
+    "test": "npm run test:unit",
+    "test:unit": "jest --testMatch '**/test/unit/**/*.test.js'",
+    "test:coverage": "jest --coverage --coverageThreshold='{}' --testMatch '**/test/unit/**/*.test.js'",
+    "test:coverage-check": "jest --coverage --testMatch '**/test/unit/**/*.test.js'",
+    "test:junit": "jest --reporters=default --reporters=jest-junit --testMatch '**/test/unit/**/*.test.js'",
     "cover": "npx nyc --all report --reporter=lcov npm run test",
     "testing": "npx ava",
     "test:coverage-dep": "nyc ava",
