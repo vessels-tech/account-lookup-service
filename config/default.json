@@ -2,6 +2,10 @@
   "ADMIN_PORT": 4001,
   "API_PORT": 4002,
   "DATABASE_URI": "mysql://account_lookup:password@localhost:3306/account_lookup",
+  "DB_CONNECTION": {
+    "POOL_MIN": 10,
+    "POOL_MAX": 30
+  },
   "DISPLAY_ROUTES": true,
   "RUN_MIGRATIONS": true,
   "ENDPOINT_CACHE_CONFIG": {
